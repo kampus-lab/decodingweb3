@@ -1,0 +1,223 @@
+<!--
+  HOW TO ADD YOUR LINKS
+  Find the topic you want below — each one looks like:
+      <a href="" target="_blank">Topic Name</a>
+  Paste your URL between the empty quotes, e.g.:
+      <a href="https://example.com/my-article" target="_blank">Topic Name</a>
+  Save the file and reopen it in a browser. That's it — no other code needs to change.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 0 64px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:40px 32px 30px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.2vw,42px);
+    line-height:1.08; margin:0 0 12px; max-width:640px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:560px; color:#D8D2BE; margin:0; font-size:15px;}
+  .cover-stamp{
+    position:absolute; right:28px; top:28px; width:92px; height:92px;
+    border:2px solid #C9B978; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transform:rotate(-9deg); opacity:.85;
+  }
+  .cover-stamp span{font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-align:center; color:#C9B978; line-height:1.4;}
+
+  /* ---------- Chapters (native <details> dropdowns, no JS) ---------- */
+  .chapter{margin:0 32px; border-bottom:1px solid var(--rule);}
+
+  .chapter-head{
+    list-style:none;
+    display:flex; align-items:center; gap:12px;
+    padding:18px 2px; cursor:pointer;
+  }
+  .chapter-head::-webkit-details-marker{display:none;}
+  .chapter-head:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  .chapter-no{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--gold); width:30px; flex:0 0 auto;}
+  .chapter-title{
+    font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin:0; flex:1 1 auto;
+  }
+  .chapter-count{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); white-space:nowrap;}
+  .chevron{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--gold); width:18px; text-align:center;
+    transition:transform .2s; display:inline-block;
+  }
+  .chapter[open] .chevron{transform:rotate(180deg);}
+
+  .chapter-body-inner{padding:0 2px 18px 42px;}
+
+  .topic-list{list-style:none; margin:0; padding:0;}
+  .topic-list li{padding:9px 0; border-bottom:1px dotted var(--rule);}
+  .topic-list li:last-child{border-bottom:none;}
+
+  .topic-list a{
+    font-size:15.5px; color:var(--cover);
+    text-decoration:underline; text-decoration-color:var(--rule-strong); text-decoration-thickness:1px;
+  }
+  .topic-list a:hover{color:var(--gold); text-decoration-color:var(--gold);}
+
+  .footer-note{
+    margin:30px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Index — Vol. 0</p>
+  <h1>The Web3 &amp; Blockchain <em>Study Ledger</em></h1>
+  <p>Forty topics, organized into eight modules. Open a module to see its topics — each one is a plain link tag, ready for you to fill in.</p>
+  <div class="cover-stamp"><span>YOUR<br>SOURCES<br>GO HERE</span></div>
+</div>
+
+<div class="wrap">
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">01</span><h2 class="chapter-title">Foundations</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Cryptographic Hash Functions</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Public-Key Cryptography &amp; Digital Signatures</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Merkle Trees &amp; Data Structures</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Peer-to-Peer Networks</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Distributed Systems &amp; the CAP Theorem</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">02</span><h2 class="chapter-title">Core Blockchain Mechanics</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Blocks, Chains &amp; Forks</a></li>
+        <li><a href="" target="_blank" rel="consensus.html">Consensus Mechanisms (PoW, PoS, BFT…)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Mempool &amp; Transaction Lifecycle</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Gas, Fees &amp; Validator Economics</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Full, Light &amp; Archive Nodes</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">03</span><h2 class="chapter-title">Smart Contracts &amp; Standards</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Smart Contracts &amp; the EVM</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Token Standards (ERC-20 / 721 / 1155)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Contract Design Patterns</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Account Abstraction (ERC-4337)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Oracles &amp; Off-Chain Data</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">04</span><h2 class="chapter-title">Decentralized Finance (DeFi)</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Decentralized Exchanges &amp; AMMs</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Lending &amp; Borrowing Protocols</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Stablecoins</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Yield Farming &amp; Liquidity Mining</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Derivatives &amp; Synthetic Assets</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">05</span><h2 class="chapter-title">Scaling &amp; Interoperability</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Layer 2 Rollups (Optimistic &amp; ZK)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Sidechains &amp; State Channels</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Sharding &amp; Modular Blockchains</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Cross-Chain Bridges</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Multi-Chain &amp; Appchains</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">06</span><h2 class="chapter-title">Identity, Privacy &amp; Security</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Decentralized Identity &amp; Verifiable Credentials</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Wallets &amp; Key Management</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Zero-Knowledge Proofs</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Smart Contract Security &amp; Auditing</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Common Exploits (Reentrancy, Flash Loans…)</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">07</span><h2 class="chapter-title">Governance, Economics &amp; Culture</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">DAOs &amp; On-Chain Governance</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Tokenomics &amp; Incentive Design</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">NFTs &amp; Digital Ownership</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">GameFi &amp; the Metaverse</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Regulation &amp; Legal Landscape</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="chapter">
+    <summary class="chapter-head"><span class="chapter-no">08</span><h2 class="chapter-title">Infrastructure &amp; Tooling</h2><span class="chapter-count">5 topics</span><span class="chevron" aria-hidden="true">▾</span></summary>
+    <div class="chapter-body-inner">
+      <ul class="topic-list">
+        <li><a href="" target="_blank" rel="noopener noreferrer">Decentralized Storage (IPFS, Filecoin, Arweave)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Indexing &amp; Querying (The Graph)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Developer Tooling (Hardhat, Foundry, Remix)</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">RPC Providers &amp; Node Infrastructure</a></li>
+        <li><a href="" target="_blank" rel="noopener noreferrer">Block Explorers &amp; Analytics</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <p class="footer-note">No JavaScript, no storage — just plain HTML links. Open this file in a text editor, find the topic, and put your URL inside its <code>href=""</code>.</p>
+</div>

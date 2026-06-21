@@ -1,0 +1,652 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --stamp-trustless:#2F5D45;
+    --stamp-permissioned:#8C2F39;
+    --stamp-elected:#5A4A8C;
+    --stamp-mixed:#9C5E1F;
+    --shadow: rgba(43,36,24,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 0 64px;}
+
+  /* ---------- Cover band ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:40px 32px 34px;
+    border-bottom:6px double var(--gold);
+    position:relative;
+    overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#C9B978;
+    margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:clamp(28px,4.6vw,46px);
+    line-height:1.05;
+    margin:0 0 12px;
+    max-width:680px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{
+    max-width:560px;
+    color:#D8D2BE;
+    margin:0;
+    font-size:15.5px;
+  }
+  .cover-stamp{
+    position:absolute;
+    right:28px; top:28px;
+    width:96px;height:96px;
+    border:2px solid #C9B978;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-9deg);
+    opacity:.85;
+  }
+  .cover-stamp span{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    letter-spacing:.12em;
+    text-align:center;
+    color:#C9B978;
+    line-height:1.4;
+  }
+
+  /* ---------- Trilemma note ---------- */
+  .trilemma-note{
+    margin:26px 32px 0;
+    padding:14px 18px;
+    border-left:3px solid var(--gold);
+    background:var(--paper-dim);
+    font-size:14.5px;
+    color:var(--ink-soft);
+  }
+  .trilemma-note b{color:var(--ink);}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin:28px 32px 6px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--rule);
+    display:flex; flex-wrap:wrap; gap:14px;
+    align-items:center;
+  }
+  .search-box{
+    flex:1 1 200px;
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    padding:9px 12px;
+    border:1px solid var(--rule-strong);
+    background:#fff;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .search-box input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:.04em;
+    padding:7px 12px;
+    border:1px solid var(--rule-strong);
+    background:transparent;
+    color:var(--ink-soft);
+    border-radius:14px;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .chip:hover{background:var(--paper-dim);}
+  .chip.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+  .chip:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .sort-box select{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:8px 10px;
+    border:1px solid var(--rule-strong);
+    background:#fff;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .count-note{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:10px 32px 0;
+  }
+
+  /* ---------- Grid / entries ---------- */
+  .grid{margin:18px 32px 0; display:flex; flex-direction:column; gap:0;}
+  .entry{
+    border-bottom:1px solid var(--rule);
+  }
+  .entry-head{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:none;
+    border:none;
+    text-align:left;
+    padding:16px 4px;
+    cursor:pointer;
+    font:inherit;
+    color:inherit;
+  }
+  .entry-head:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .entry-no{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--gold);
+    width:38px;
+    flex:0 0 auto;
+  }
+  .entry-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:19px;
+    margin:0;
+    flex:1 1 auto;
+    min-width:140px;
+  }
+  .entry-family{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    display:none;
+  }
+  @media(min-width:640px){ .entry-family{display:inline;} }
+
+  .stamp{
+    flex:0 0 auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    padding:4px 9px;
+    border:1.5px solid currentColor;
+    border-radius:3px;
+    transform:rotate(-3deg);
+    white-space:nowrap;
+  }
+  .stamp--trustless{color:var(--stamp-trustless);}
+  .stamp--permissioned{color:var(--stamp-permissioned);}
+  .stamp--elected{color:var(--stamp-elected);}
+  .stamp--mixed{color:var(--stamp-mixed);}
+
+  .chevron{
+    flex:0 0 auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:16px;
+    color:var(--gold);
+    width:18px; text-align:center;
+    transition:transform .2s;
+  }
+  .entry.open .chevron{transform:rotate(45deg);}
+
+  .entry-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .28s ease;
+  }
+  .entry.open .entry-body{max-height:1400px;}
+  .entry-body-inner{padding:0 4px 24px 52px;}
+
+  .mechanism{margin:0 0 16px; font-size:15px; color:var(--ink);}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px;}
+  @media(max-width:560px){ .two-col{grid-template-columns:1fr;} }
+  .two-col h4{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 6px;
+  }
+  .two-col ul{margin:0; padding-left:18px; font-size:14px;}
+  .two-col li{margin-bottom:4px;}
+
+  .ratings{margin-bottom:18px;}
+  .rating-row{display:flex; align-items:center; gap:10px; margin-bottom:5px;}
+  .rating-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; color:var(--ink-soft);
+    width:140px; flex:0 0 auto;
+  }
+  .ticks{display:flex; gap:3px;}
+  .tick{
+    width:14px;height:14px;
+    border:1.3px solid var(--rule-strong);
+    border-radius:2px;
+  }
+  .tick.filled{background:var(--gold); border-color:var(--gold);}
+
+  .usedby h4{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 6px;
+  }
+  .usedby-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;}
+  .usedby-chips span{
+    font-size:12.5px;
+    background:var(--paper-dim);
+    border:1px solid var(--rule);
+    padding:3px 9px;
+    border-radius:10px;
+    color:var(--ink-soft);
+  }
+
+  .pin-toggle{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .pin-toggle input{accent-color:var(--gold); cursor:pointer;}
+
+  /* ---------- Comparison tray ---------- */
+  .tray{
+    position:sticky; bottom:0;
+    margin-top:30px;
+    background:var(--cover);
+    color:var(--paper);
+    border-top:4px double var(--gold);
+    display:none;
+  }
+  .tray.show{display:block;}
+  .tray-inner{padding:16px 32px 20px;}
+  .tray-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:#C9B978; margin:0 0 12px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .tray-clear{
+    background:none; border:1px solid #C9B978; color:#C9B978;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    padding:4px 9px; border-radius:10px; cursor:pointer;
+  }
+  .tray-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px;
+  }
+  .tray-card{
+    background:rgba(241,236,221,0.06);
+    border:1px solid rgba(201,185,120,0.35);
+    border-radius:4px;
+    padding:12px;
+    font-size:12.5px;
+  }
+  .tray-card h5{
+    font-family:'Fraunces',serif; font-size:15px; margin:0 0 6px; color:var(--paper);
+  }
+  .tray-card .tray-stamp{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:#C9B978; margin-bottom:8px; display:block;}
+  .tray-card .tray-row{display:flex; justify-content:space-between; margin-bottom:3px; color:#D8D2BE;}
+  .tray-card .tray-row b{color:var(--paper); font-weight:600;}
+  .tray-remove{
+    margin-top:8px; background:none; border:none; color:#C9B978;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; cursor:pointer; padding:0;
+    text-decoration:underline;
+  }
+
+  .footer-note{
+    margin:34px 32px 0;
+    font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;
+    border-top:1px solid var(--rule);
+    padding-top:14px;
+  }
+
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+
+<div class="wrap">
+
+  <div class="cover">
+    <p class="cover-eyebrow">Vol. I — Distributed Systems</p>
+    <h1>A Field Ledger of <em>Consensus Mechanisms</em></h1>
+    <p>Thirteen ways a network of strangers can agree on one ledger, catalogued by family, trust model, and cost. Tap an entry to read the full record.</p>
+    <div class="cover-stamp"><span>NO CENTRAL<br>AUTHORITY<br>REQUIRED</span></div>
+  </div>
+
+  <p class="trilemma-note"><b>The trilemma, in short:</b> every mechanism below trades off <b>decentralization</b>, <b>security</b>, and <b>speed</b> against one another. None of the thirteen wins all three — which is why so many keep getting invented.</p>
+
+  <div class="controls">
+    <div class="search-box">
+      <label for="search" class="sr-only">Search by name or chain</label>
+      <input id="search" type="text" placeholder="Search a protocol or chain — e.g. Solana, Bitcoin, slashing…" autocomplete="off">
+    </div>
+    <div class="chips" id="familyChips" role="group" aria-label="Filter by family"></div>
+    <div class="sort-box">
+      <label for="sortSelect" class="sr-only">Sort by</label>
+      <select id="sortSelect">
+        <option value="entryNo">Sort: catalog order</option>
+        <option value="decentralization">Sort: most decentralized</option>
+        <option value="energy">Sort: most energy‑efficient</option>
+        <option value="speed">Sort: fastest</option>
+        <option value="security">Sort: most battle‑tested</option>
+      </select>
+    </div>
+  </div>
+  <p class="count-note" id="countNote"></p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="tray" id="tray">
+    <div class="tray-inner">
+      <p class="tray-title"><span>Comparison tray — pinned entries</span><button class="tray-clear" id="trayClear">Clear all</button></p>
+      <div class="tray-grid" id="trayGrid"></div>
+    </div>
+  </div>
+
+  <p class="footer-note">13 entries. Ratings are approximate, comparative judgments — not benchmark scores — meant to show direction of trade‑off, not precision. Pin up to 4 entries to compare them side by side.</p>
+</div>
+
+<script>
+(function(){
+  const DATA = [
+    {id:'pow', no:'01', name:'Proof of Work', family:'computation', familyLabel:'Computational Cost', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Miners race to solve a cryptographic puzzle — finding a hash below a target value — by brute-force guessing. The first to solve it proposes the next block and collects the reward. Rewriting history would require out-computing the rest of the network combined.',
+      pros:['Battle-tested since 2009, highest security track record','No need to vet or trust who the miners are','Fully permissionless to join'],
+      cons:['Enormous, ongoing energy consumption','Slow block times and limited throughput','Mining power has centralized into a few large pools'],
+      usedBy:['Bitcoin','Litecoin','Pre-2022 Ethereum'],
+      ratings:{decentralization:5, energy:1, speed:1, security:5}},
+
+    {id:'pos', no:'02', name:'Proof of Stake', family:'stake', familyLabel:'Stake & Election', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Validators lock up coins as collateral. The protocol picks one to propose the next block, usually weighted by stake size. Acting dishonestly gets that collateral destroyed — "slashed" — so security comes from capital at risk rather than electricity burned.',
+      pros:['Energy use is a tiny fraction of Proof of Work','Faster, often deterministic finality','Capital cost can scale more predictably than hardware'],
+      cons:['Wealth concentration can compound ("rich get richer")','Slashing and validator logic add real protocol complexity','Newer security model than Proof of Work, still proving itself over decades'],
+      usedBy:['Ethereum (post-Merge)','Cardano','Polkadot'],
+      ratings:{decentralization:4, energy:5, speed:4, security:4}},
+
+    {id:'dpos', no:'03', name:'Delegated Proof of Stake', family:'stake', familyLabel:'Stake & Election', trust:'elected', trustLabel:'ELECTED',
+      mechanism:'Token holders vote to elect a small panel of delegates, who then take turns producing blocks on everyone\'s behalf — representative democracy layered on top of staking.',
+      pros:['Very fast block production and confirmation','Efficient — few parties need to coordinate'],
+      cons:['Power concentrates among a small elected circle','Voter turnout and engagement tend to be low in practice'],
+      usedBy:['EOS','Tron','Early Steem'],
+      ratings:{decentralization:2, energy:5, speed:5, security:3}},
+
+    {id:'pbft', no:'04', name:'Practical Byzantine Fault Tolerance', family:'voting', familyLabel:'Voting & Finality', trust:'permissioned', trustLabel:'PERMISSIONED',
+      mechanism:'A fixed, known set of nodes pass through rounds of messaging — pre-prepare, prepare, commit — until enough of them agree. The system tolerates up to one-third of nodes being faulty or malicious, but every participant must already be identified.',
+      pros:['Finality is immediate — no waiting for confirmations to pile up','No mining or staking overhead at all'],
+      cons:['Message traffic grows quickly as more nodes join','Needs a known, vetted validator set — not open to anonymous strangers'],
+      usedBy:['Hyperledger Fabric','Early Zilliqa'],
+      ratings:{decentralization:1, energy:5, speed:4, security:4}},
+
+    {id:'poa', no:'05', name:'Proof of Authority', family:'voting', familyLabel:'Voting & Finality', trust:'permissioned', trustLabel:'PERMISSIONED',
+      mechanism:'A small set of pre-approved, identified validators take turns signing blocks. Trust rests on their real-world reputation and identity rather than on stake or computation.',
+      pros:['Very fast and cheap to run','Simple to reason about and operate'],
+      cons:['Highly centralized by design','Defeats the trustless ideal for any public, adversarial network'],
+      usedBy:['VeChain','Early Ethereum test networks'],
+      ratings:{decentralization:1, energy:5, speed:5, security:3}},
+
+    {id:'tendermint', no:'06', name:'Tendermint / HotStuff BFT', family:'voting', familyLabel:'Voting & Finality', trust:'permissioned', trustLabel:'PERMISSIONED',
+      mechanism:'A modern, streamlined evolution of classical BFT voting. Validators propose and vote in rounds; once roughly two-thirds agree, the block is final — instantly, with no probabilistic waiting period. HotStuff trims the message overhead so it scales further than older BFT designs.',
+      pros:['Instant, deterministic finality','Communication overhead scales far better than classic PBFT'],
+      cons:['Still needs a known, bounded set of validators','Fault tolerance has a hard ceiling, typically around one-third'],
+      usedBy:['Cosmos','Celo','Diem / Libra design'],
+      ratings:{decentralization:3, energy:5, speed:4, security:4}},
+
+    {id:'poh', no:'07', name:'Proof of History', family:'topological', familyLabel:'Topological Consensus', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Not a full consensus method by itself — a verifiable delay function timestamps events so the order of transactions is provable without nodes constantly cross-checking each other. It\'s paired with a stake-weighted voting layer (Tower BFT) to actually finalize blocks.',
+      pros:['Extremely high throughput when paired with fast hardware','Removes most of the chatter needed to agree on ordering'],
+      cons:['Demands powerful, tightly time-synced validator hardware','Has drawn criticism over network stability and outages'],
+      usedBy:['Solana'],
+      ratings:{decentralization:3, energy:4, speed:5, security:3}},
+
+    {id:'avalanche', no:'08', name:'Avalanche Consensus', family:'topological', familyLabel:'Topological Consensus', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Nodes repeatedly sample small random subsets of their peers and update their preferred outcome based on what that sample favors. Run enough rounds of this gossip and the whole network converges — no single global vote required.',
+      pros:['High throughput with fast, sub-second-ish finality','Scales gracefully as more nodes join'],
+      cons:['Newer design with a shorter track record than Proof of Work or classical BFT'],
+      usedBy:['Avalanche network'],
+      ratings:{decentralization:4, energy:5, speed:5, security:3}},
+
+    {id:'dag', no:'09', name:'DAG-Based Consensus', family:'topological', familyLabel:'Topological Consensus', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Transactions form a graph rather than a single chain — each new transaction references and helps confirm earlier ones. Agreement emerges from this web of references instead of from one elected block producer at a time.',
+      pros:['Potential for very high parallel throughput','No dedicated miner or block-producer role needed'],
+      cons:['Security assumptions are less battle-tested than chain-based designs','Some implementations have leaned on a central coordinator node'],
+      usedBy:['IOTA (Tangle)','Nano (block-lattice)'],
+      ratings:{decentralization:3, energy:5, speed:5, security:2}},
+
+    {id:'pospace', no:'10', name:'Proof of Space', family:'computation', familyLabel:'Computational Cost', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Validators pre-generate and store large datasets ("plots") on disk, then prove they\'re holding that storage to win the right to produce a block — substituting disk space for the burned electricity of Proof of Work.',
+      pros:['Far less ongoing energy draw than Proof of Work'],
+      cons:['Shifts the competitive arms race onto storage hardware','Has caused real-world SSD demand spikes and shortages'],
+      usedBy:['Chia'],
+      ratings:{decentralization:4, energy:3, speed:2, security:3}},
+
+    {id:'poburn', no:'11', name:'Proof of Burn', family:'computation', familyLabel:'Computational Cost', trust:'trustless', trustLabel:'TRUSTLESS',
+      mechanism:'Participants provably destroy coins by sending them to an address no one can ever spend from. The amount burned earns proportional mining rights — meant to mimic the sunk cost of Proof of Work without continuous energy use.',
+      pros:['Captures a sunk-cost security argument without ongoing electricity use'],
+      cons:['Very limited real-world adoption','Still destroys economic value rather than converting it into useful work'],
+      usedBy:['Slimcoin','A handful of smaller chains'],
+      ratings:{decentralization:3, energy:4, speed:2, security:2}},
+
+    {id:'poet', no:'12', name:'Proof of Elapsed Time', family:'computation', familyLabel:'Computational Cost', trust:'permissioned', trustLabel:'PERMISSIONED',
+      mechanism:'A trusted hardware enclave — such as Intel SGX — hands each node a random wait time. Whichever timer runs out first earns the right to propose the next block, giving everyone a fair, low-energy lottery.',
+      pros:['Very low energy use','Scheduling is fair and computationally cheap'],
+      cons:['Trust shifts to a specific hardware vendor\'s chip and firmware'],
+      usedBy:['Hyperledger Sawtooth'],
+      ratings:{decentralization:2, energy:5, speed:3, security:2}},
+
+    {id:'hybrid', no:'13', name:'Hybrid (PoW + PoS)', family:'hybrid', familyLabel:'Hybrid', trust:'mixed', trustLabel:'MIXED',
+      mechanism:'Proof of Work miners produce candidate blocks as usual, but stakeholders then vote to ratify or reject each one — splitting power between those who mine and those who hold and govern the coin.',
+      pros:['Balances raw mining security with stakeholder governance over upgrades'],
+      cons:['Running two coordinated systems adds real design and operational complexity'],
+      usedBy:['Decred'],
+      ratings:{decentralization:4, energy:2, speed:2, security:4}}
+  ];
+
+  const FAMILIES = [
+    {id:'all', label:'All families'},
+    {id:'computation', label:'Computational Cost'},
+    {id:'stake', label:'Stake & Election'},
+    {id:'voting', label:'Voting & Finality'},
+    {id:'topological', label:'Topological Consensus'},
+    {id:'hybrid', label:'Hybrid'}
+  ];
+
+  const state = { family:'all', query:'', sortBy:'entryNo', open:new Set(), pinned:new Set() };
+
+  const grid = document.getElementById('grid');
+  const countNote = document.getElementById('countNote');
+  const chipsEl = document.getElementById('familyChips');
+  const sortSelect = document.getElementById('sortSelect');
+  const searchInput = document.getElementById('search');
+  const tray = document.getElementById('tray');
+  const trayGrid = document.getElementById('trayGrid');
+
+  function buildChips(){
+    chipsEl.innerHTML = FAMILIES.map(f =>
+      `<button class="chip${f.id===state.family?' active':''}" data-family="${f.id}" aria-pressed="${f.id===state.family}">${f.label}</button>`
+    ).join('');
+  }
+
+  function ticksHTML(val){
+    let out='';
+    for(let i=1;i<=5;i++) out += `<span class="tick${i<=val?' filled':''}"></span>`;
+    return out;
+  }
+
+  function stampClass(trust){
+    return {trustless:'stamp--trustless', permissioned:'stamp--permissioned', elected:'stamp--elected', mixed:'stamp--mixed'}[trust] || '';
+  }
+
+  function matchesQuery(item, q){
+    if(!q) return true;
+    const hay = (item.name + ' ' + item.usedBy.join(' ') + ' ' + item.familyLabel).toLowerCase();
+    return hay.includes(q.toLowerCase());
+  }
+
+  function getFiltered(){
+    let list = DATA.filter(d => (state.family==='all' || d.family===state.family) && matchesQuery(d, state.query));
+    if(state.sortBy === 'entryNo'){
+      list = list.slice().sort((a,b)=>a.no.localeCompare(b.no));
+    } else {
+      list = list.slice().sort((a,b)=>b.ratings[state.sortBy]-a.ratings[state.sortBy]);
+    }
+    return list;
+  }
+
+  function renderGrid(){
+    const list = getFiltered();
+    countNote.textContent = `Showing ${list.length} of ${DATA.length} entries`;
+    grid.innerHTML = list.map(item => {
+      const isOpen = state.open.has(item.id);
+      const isPinned = state.pinned.has(item.id);
+      return `
+      <article class="entry${isOpen?' open':''}" data-id="${item.id}">
+        <button class="entry-head" aria-expanded="${isOpen}">
+          <span class="entry-no">No. ${item.no}</span>
+          <h3 class="entry-title">${item.name}</h3>
+          <span class="entry-family">${item.familyLabel}</span>
+          <span class="stamp ${stampClass(item.trust)}">${item.trustLabel}</span>
+          <span class="chevron" aria-hidden="true">+</span>
+        </button>
+        <div class="entry-body">
+          <div class="entry-body-inner">
+            <p class="mechanism">${item.mechanism}</p>
+            <div class="two-col">
+              <div class="pros"><h4>Strengths</h4><ul>${item.pros.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+              <div class="cons"><h4>Trade-offs</h4><ul>${item.cons.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+            </div>
+            <div class="ratings">
+              <div class="rating-row"><span class="rating-label">Decentralization</span><span class="ticks">${ticksHTML(item.ratings.decentralization)}</span></div>
+              <div class="rating-row"><span class="rating-label">Energy efficiency</span><span class="ticks">${ticksHTML(item.ratings.energy)}</span></div>
+              <div class="rating-row"><span class="rating-label">Speed / throughput</span><span class="ticks">${ticksHTML(item.ratings.speed)}</span></div>
+              <div class="rating-row"><span class="rating-label">Security track record</span><span class="ticks">${ticksHTML(item.ratings.security)}</span></div>
+            </div>
+            <div class="usedby">
+              <h4>Found in</h4>
+              <div class="usedby-chips">${item.usedBy.map(u=>`<span>${u}</span>`).join('')}</div>
+            </div>
+            <label class="pin-toggle">
+              <input type="checkbox" class="pin-cb" data-id="${item.id}" ${isPinned?'checked':''}>
+              Pin to comparison tray
+            </label>
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  function renderTray(){
+    const pinnedItems = DATA.filter(d => state.pinned.has(d.id));
+    if(pinnedItems.length === 0){ tray.classList.remove('show'); return; }
+    tray.classList.add('show');
+    trayGrid.innerHTML = pinnedItems.map(item => `
+      <div class="tray-card">
+        <h5>${item.name}</h5>
+        <span class="tray-stamp">${item.trustLabel} · ${item.familyLabel}</span>
+        <div class="tray-row"><span>Decentralization</span><b>${item.ratings.decentralization}/5</b></div>
+        <div class="tray-row"><span>Energy</span><b>${item.ratings.energy}/5</b></div>
+        <div class="tray-row"><span>Speed</span><b>${item.ratings.speed}/5</b></div>
+        <div class="tray-row"><span>Security</span><b>${item.ratings.security}/5</b></div>
+        <button class="tray-remove" data-id="${item.id}">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  // Event delegation on grid
+  grid.addEventListener('click', e=>{
+    const head = e.target.closest('.entry-head');
+    if(head){
+      const entry = head.closest('.entry');
+      const id = entry.dataset.id;
+      if(state.open.has(id)) state.open.delete(id); else state.open.add(id);
+      renderGrid();
+    }
+  });
+  grid.addEventListener('change', e=>{
+    if(e.target.classList.contains('pin-cb')){
+      const id = e.target.dataset.id;
+      if(e.target.checked){
+        if(state.pinned.size >= 4){
+          e.target.checked = false;
+          return;
+        }
+        state.pinned.add(id);
+      } else {
+        state.pinned.delete(id);
+      }
+      renderTray();
+    }
+  });
+
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    state.family = btn.dataset.family;
+    buildChips();
+    renderGrid();
+  });
+
+  sortSelect.addEventListener('change', e=>{
+    state.sortBy = e.target.value;
+    renderGrid();
+  });
+
+  searchInput.addEventListener('input', e=>{
+    state.query = e.target.value;
+    renderGrid();
+  });
+
+  document.getElementById('trayClear').addEventListener('click', ()=>{
+    state.pinned.clear();
+    renderGrid();
+    renderTray();
+  });
+
+  trayGrid.addEventListener('click', e=>{
+    const btn = e.target.closest('.tray-remove');
+    if(!btn) return;
+    state.pinned.delete(btn.dataset.id);
+    renderGrid();
+    renderTray();
+  });
+
+  buildChips();
+  renderGrid();
+  renderTray();
+})();
+</script>
