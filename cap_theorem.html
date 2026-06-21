@@ -1,0 +1,433 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --good:#2F5D45;
+    --bad:#8C2F39;
+    --warn:#9C5E1F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.4vw,42px);
+    line-height:1.08; margin:0 0 12px; max-width:640px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+
+  .cap-defs{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0 18px;}
+  .cap-defs .def{background:var(--paper-dim); border:1px solid var(--rule); border-radius:6px; padding:12px 14px;}
+  .cap-defs .def .letter{font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:var(--gold);}
+  .cap-defs .def h4{margin:4px 0 6px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink);}
+  .cap-defs .def p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+  @media (max-width:620px){ .cap-defs{grid-template-columns:1fr;} }
+
+  /* ---------- Diagram panel ---------- */
+  .diagram-panel{
+    margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:22px 18px 24px;
+  }
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 18px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .mode-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:20px;}
+  .mode-row .mode-label{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);}
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 13px; border-radius:14px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink-soft); cursor:pointer;
+  }
+  .chip.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+  .chip-hint{font-size:11.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; flex-basis:100%;}
+
+  .cap-stage{display:flex; align-items:center; gap:0; margin-bottom:18px;}
+  .cap-node{
+    flex:0 0 auto; width:190px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:7px;
+    padding:14px; transition:opacity .2s;
+  }
+  .cap-node h4{margin:0 0 8px; font-family:'Fraunces',serif; font-weight:600; font-size:16px;}
+  .cap-node .status-pill{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:2px 8px;
+    border-radius:9px; margin-bottom:8px; background:rgba(47,93,69,0.12); color:var(--good);
+  }
+  .cap-node .status-pill.isolated{background:rgba(156,94,31,0.14); color:var(--warn);}
+  .cap-node .status-pill.blocked{background:rgba(140,47,57,0.12); color:var(--bad);}
+  .cap-node .value-display{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--paper-dim); border:1px solid var(--rule);
+    border-radius:4px; padding:9px; margin-bottom:6px; min-height:20px; word-break:break-word;
+  }
+  .cap-node .ts{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-bottom:10px;}
+  .cap-node input[type=text]{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:6px 8px;
+    border:1px solid var(--rule-strong); border-radius:3px; margin-bottom:6px; background:#fff; color:var(--ink);
+  }
+  .cap-node input[type=text]:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .cap-node .write-btn{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; padding:7px; border-radius:4px;
+    border:1px solid var(--cover); background:var(--cover); color:var(--paper); cursor:pointer;
+  }
+  .cap-node .write-btn:disabled{background:#fff; color:var(--rule-strong); border-color:var(--rule); cursor:not-allowed;}
+  .cap-node .blocked-msg{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--bad); margin-top:6px;}
+  .cap-node .diverge-flag{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--warn); margin-top:6px;}
+
+  .cap-link{flex:1 1 auto; min-width:60px; display:flex; align-items:center; justify-content:center; position:relative; height:60px;}
+  .cap-link .line{position:absolute; left:0; right:0; top:50%; height:2px; background:var(--gold); transform:translateY(-1px);}
+  .cap-link.partitioned .line{background:transparent; border-top:2px dashed var(--bad);}
+  .link-btn{
+    position:relative; z-index:2; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    padding:7px 12px; border-radius:14px; border:1.5px solid var(--gold); background:#fff; color:var(--gold);
+    cursor:pointer; white-space:nowrap;
+  }
+  .link-btn.is-partitioned{border-color:var(--bad); color:var(--bad);}
+
+  .cap-controls-row{display:flex; justify-content:flex-end; margin-bottom:14px;}
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+    background:none; border:1px solid var(--rule-strong); border-radius:12px; padding:6px 12px; cursor:pointer;
+  }
+  .reset-btn:hover{background:#fff;}
+
+  .cap-log{
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:10px 14px;
+    max-height:160px; overflow-y:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);
+  }
+  .cap-log p{margin:0 0 5px;}
+  .cap-log p:last-child{margin-bottom:0;}
+
+  .note-box{
+    margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);
+  }
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+
+  .footer-note{
+    margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+
+  @media (max-width:560px){
+    .cap-stage{flex-direction:column;}
+    .cap-node{width:100%;}
+    .cap-link{width:100%; height:auto; padding:10px 0;}
+    .cap-link .line{display:none;}
+  }
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Foundations — Topic 05 of 40</p>
+  <h1>Distributed Systems &amp; the <em>CAP Theorem</em></h1>
+  <p>Why no distributed system — blockchains included — can ever promise perfect agreement, instant answers, and a network that never breaks, all at once.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>Pick two. The network picks the third for you.</h2>
+    <p>The CAP theorem says a distributed data system can only guarantee two of these three properties at the same time:</p>
+
+    <div class="cap-defs">
+      <div class="def"><span class="letter">C</span><h4>Consistency</h4><p>Every node gives back the same, most up-to-date answer — or refuses to answer at all.</p></div>
+      <div class="def"><span class="letter">A</span><h4>Availability</h4><p>Every request gets a real answer, even if it might be a little out of date.</p></div>
+      <div class="def"><span class="letter">P</span><h4>Partition tolerance</h4><p>The system keeps running even when nodes lose the ability to talk to each other.</p></div>
+    </div>
+
+    <p>Here's the catch: at any real scale, network partitions <em>will</em> happen — a cable gets cut, a router fails, a data center loses power. Partition tolerance isn't really a choice you get to opt out of. So the actual decision every distributed system makes is what happens <strong>during</strong> a partition: stay correct and risk going silent (<strong>CP</strong>), or stay responsive and risk disagreement (<strong>AP</strong>).</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Try it yourself</p>
+    <h2>Cut the network. Watch what each choice costs.</h2>
+    <p>Below are two replicas of the same piece of data. Write to either one, then partition the network between them and try writing again under each mode.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Write a value to Node A, then create a partition. Switch between CP and AP and try writing to Node B. Heal the partition afterward to see how — or whether — the two sides reconcile.</p>
+
+    <div class="mode-row">
+      <span class="mode-label">When partitioned, this system prioritizes:</span>
+      <button class="chip active" id="modeCP" data-mode="CP">CP — Consistency</button>
+      <button class="chip" id="modeAP" data-mode="AP">AP — Availability</button>
+      <span class="chip-hint" id="modeHint">A node that loses contact with the rest of the cluster refuses requests rather than risk a wrong answer.</span>
+    </div>
+
+    <div class="cap-stage">
+      <div class="cap-node" id="nodeA">
+        <h4>Node A</h4>
+        <span class="status-pill" id="pillA">🟢 connected</span>
+        <div class="value-display" id="valueA">Hello</div>
+        <div class="ts" id="tsA">last write: —</div>
+        <input type="text" id="inputA" placeholder="new value…">
+        <button class="write-btn" id="writeA">Write to Node A</button>
+        <div id="msgA"></div>
+      </div>
+
+      <div class="cap-link" id="capLink">
+        <div class="line"></div>
+        <button class="link-btn" id="linkBtn">🔌 Create partition</button>
+      </div>
+
+      <div class="cap-node" id="nodeB">
+        <h4>Node B</h4>
+        <span class="status-pill" id="pillB">🟢 connected</span>
+        <div class="value-display" id="valueB">Hello</div>
+        <div class="ts" id="tsB">last write: —</div>
+        <input type="text" id="inputB" placeholder="new value…">
+        <button class="write-btn" id="writeB">Write to Node B</button>
+        <div id="msgB"></div>
+      </div>
+    </div>
+
+    <div class="cap-controls-row">
+      <button class="reset-btn" id="resetBtn">↺ Reset simulation</button>
+    </div>
+
+    <div class="cap-log" id="capLog"></div>
+  </div>
+
+  <div class="note-box">
+    With only two nodes there's no real "majority" to vote for — so this demo always treats Node A as the side still reachable from the rest of a hypothetical cluster, and Node B as the side that's been cut off. In production CP systems (etcd, Zookeeper, most relational databases with synchronous replication), that decision is made automatically by a quorum vote, not by node name.
+  </div>
+
+  <div class="section">
+    <p class="kicker">One more wrinkle</p>
+    <h2>PACELC: the tradeoff that's there even without a partition</h2>
+    <p>CAP only describes what happens <em>during</em> a partition. The PACELC extension points out that even on a perfectly healthy network, you still have to choose between <strong>L</strong>atency and <strong>C</strong>onsistency: waiting for every replica to confirm a write is safer but slower, while answering immediately from one replica is fast but might be a moment behind.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>CP, AP, and where blockchains fit</h2>
+    <ul class="uses-list">
+      <li><strong>CP systems</strong> — traditional relational databases with synchronous replicas, etcd, Zookeeper. They'd rather return an error than risk an inconsistent answer.</li>
+      <li><strong>AP systems</strong> — Cassandra, DynamoDB, CouchDB. They always answer, and reconcile conflicting writes later, often with the same last-write-wins idea used in the simulation above.</li>
+      <li><strong>Blockchains lean AP.</strong> When the network briefly disagrees — say, two miners find a block at nearly the same time — different nodes temporarily show different "latest" states. The chain doesn't halt and refuse to answer; it stays available, and the longest-chain (or finality) rule reconciles the fork later. That's exactly why exchanges wait for several confirmations before treating a transaction as settled — they're waiting for eventual consistency to actually arrive.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">This simulation runs entirely in your browser — it's a simplified model to make the tradeoff visible, not a real consensus protocol.</p>
+</div>
+
+<script>
+(function(){
+  const state = {
+    mode: 'CP',
+    partitioned: false,
+    nodeA: { value: 'Hello', ts: null },
+    nodeB: { value: 'Hello', ts: null },
+    log: []
+  };
+
+  const els = {
+    modeCP: document.getElementById('modeCP'),
+    modeAP: document.getElementById('modeAP'),
+    modeHint: document.getElementById('modeHint'),
+    capLink: document.getElementById('capLink'),
+    linkBtn: document.getElementById('linkBtn'),
+    nodeA: document.getElementById('nodeA'),
+    nodeB: document.getElementById('nodeB'),
+    pillA: document.getElementById('pillA'),
+    pillB: document.getElementById('pillB'),
+    valueA: document.getElementById('valueA'),
+    valueB: document.getElementById('valueB'),
+    tsA: document.getElementById('tsA'),
+    tsB: document.getElementById('tsB'),
+    inputA: document.getElementById('inputA'),
+    inputB: document.getElementById('inputB'),
+    writeA: document.getElementById('writeA'),
+    writeB: document.getElementById('writeB'),
+    msgA: document.getElementById('msgA'),
+    msgB: document.getElementById('msgB'),
+    resetBtn: document.getElementById('resetBtn'),
+    capLog: document.getElementById('capLog'),
+  };
+
+  const MODE_HINTS = {
+    CP: 'A node that loses contact with the rest of the cluster refuses requests rather than risk a wrong answer.',
+    AP: 'Every node keeps answering requests, even if their answers start to disagree with each other.'
+  };
+
+  function fmtTime(ts){
+    if(!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour12:false }) + '.' + String(d.getMilliseconds()).padStart(3,'0');
+  }
+
+  function logEvent(msg){
+    state.log.push(msg);
+    if(state.log.length > 50) state.log.shift();
+    els.capLog.innerHTML = state.log.map(m => `<p>${m}</p>`).join('');
+    els.capLog.scrollTop = els.capLog.scrollHeight;
+  }
+
+  function render(){
+    // mode chips
+    els.modeCP.classList.toggle('active', state.mode === 'CP');
+    els.modeAP.classList.toggle('active', state.mode === 'AP');
+    els.modeHint.textContent = MODE_HINTS[state.mode];
+
+    // link
+    els.capLink.classList.toggle('partitioned', state.partitioned);
+    els.linkBtn.classList.toggle('is-partitioned', state.partitioned);
+    els.linkBtn.textContent = state.partitioned ? '💥 Heal partition' : '🔌 Create partition';
+
+    // values
+    els.valueA.textContent = state.nodeA.value;
+    els.valueB.textContent = state.nodeB.value;
+    els.tsA.textContent = 'last write: ' + fmtTime(state.nodeA.ts);
+    els.tsB.textContent = 'last write: ' + fmtTime(state.nodeB.ts);
+
+    // node B availability under CP + partition
+    const bBlocked = state.partitioned && state.mode === 'CP';
+    els.writeB.disabled = bBlocked;
+    els.inputB.disabled = bBlocked;
+    els.msgB.innerHTML = bBlocked
+      ? '<div class="blocked-msg">⛔ Unavailable — isolated, no quorum (CP mode)</div>'
+      : '';
+    els.msgA.innerHTML = '';
+
+    // status pills
+    if(!state.partitioned){
+      els.pillA.textContent = '🟢 connected';
+      els.pillA.className = 'status-pill';
+      els.pillB.textContent = '🟢 connected';
+      els.pillB.className = 'status-pill';
+    } else if(state.mode === 'CP'){
+      els.pillA.textContent = '🟢 majority';
+      els.pillA.className = 'status-pill';
+      els.pillB.textContent = '⛔ unavailable';
+      els.pillB.className = 'status-pill blocked';
+    } else {
+      els.pillA.textContent = '🟡 isolated, still serving';
+      els.pillA.className = 'status-pill isolated';
+      els.pillB.textContent = '🟡 isolated, still serving';
+      els.pillB.className = 'status-pill isolated';
+    }
+
+    // divergence flag in AP mode
+    if(state.partitioned && state.mode === 'AP' && state.nodeA.value !== state.nodeB.value){
+      els.msgA.innerHTML = '<div class="diverge-flag">⚠ may differ from Node B</div>';
+      els.msgB.innerHTML = '<div class="diverge-flag">⚠ may differ from Node A</div>';
+    }
+  }
+
+  function writeTo(node, value){
+    if(!value) return;
+    const ts = Date.now();
+
+    if(!state.partitioned){
+      state.nodeA.value = value; state.nodeA.ts = ts;
+      state.nodeB.value = value; state.nodeB.ts = ts;
+      logEvent(`Wrote "${value}" to Node ${node} — replicated to both nodes (no partition).`);
+    } else if(state.mode === 'CP'){
+      if(node === 'A'){
+        state.nodeA.value = value; state.nodeA.ts = ts;
+        logEvent(`Wrote "${value}" to Node A — accepted (majority side).`);
+      } else {
+        logEvent(`Write to Node B rejected — isolated side has no quorum (CP mode).`);
+      }
+    } else { // AP
+      if(node === 'A'){ state.nodeA.value = value; state.nodeA.ts = ts; }
+      else { state.nodeB.value = value; state.nodeB.ts = ts; }
+      logEvent(`Wrote "${value}" to Node ${node} — accepted locally (AP mode), not replicated while partitioned.`);
+    }
+    render();
+  }
+
+  function toggleLink(){
+    if(!state.partitioned){
+      state.partitioned = true;
+      logEvent('🔌 Network partition created — Node A and Node B can no longer communicate.');
+    } else {
+      state.partitioned = false;
+      if(state.mode === 'AP' && state.nodeA.value !== state.nodeB.value){
+        if(state.nodeA.ts >= state.nodeB.ts){
+          state.nodeB.value = state.nodeA.value; state.nodeB.ts = state.nodeA.ts;
+          logEvent(`🔁 Partition healed. Reconciled via last-write-wins — Node B now matches Node A ("${state.nodeA.value}").`);
+        } else {
+          state.nodeA.value = state.nodeB.value; state.nodeA.ts = state.nodeB.ts;
+          logEvent(`🔁 Partition healed. Reconciled via last-write-wins — Node A now matches Node B ("${state.nodeB.value}").`);
+        }
+      } else if(state.mode === 'CP'){
+        state.nodeB.value = state.nodeA.value; state.nodeB.ts = state.nodeA.ts;
+        logEvent('🔌 Partition healed. Node B resumes and syncs with Node A.');
+      } else {
+        logEvent('🔌 Partition healed. Nodes were already in sync.');
+      }
+    }
+    render();
+  }
+
+  els.modeCP.addEventListener('click', () => { state.mode = 'CP'; logEvent('Mode set to CP (Consistency over Availability).'); render(); });
+  els.modeAP.addEventListener('click', () => { state.mode = 'AP'; logEvent('Mode set to AP (Availability over Consistency).'); render(); });
+  els.linkBtn.addEventListener('click', toggleLink);
+
+  els.writeA.addEventListener('click', () => { writeTo('A', els.inputA.value.trim()); els.inputA.value=''; });
+  els.writeB.addEventListener('click', () => { writeTo('B', els.inputB.value.trim()); els.inputB.value=''; });
+  els.inputA.addEventListener('keydown', e => { if(e.key==='Enter'){ writeTo('A', els.inputA.value.trim()); els.inputA.value=''; } });
+  els.inputB.addEventListener('keydown', e => { if(e.key==='Enter'){ writeTo('B', els.inputB.value.trim()); els.inputB.value=''; } });
+
+  els.resetBtn.addEventListener('click', () => {
+    state.mode = 'CP';
+    state.partitioned = false;
+    state.nodeA = { value: 'Hello', ts: null };
+    state.nodeB = { value: 'Hello', ts: null };
+    state.log = [];
+    els.capLog.innerHTML = '';
+    logEvent('Simulation reset.');
+    render();
+  });
+
+  logEvent('Simulation ready. Both nodes start in sync.');
+  render();
+})();
+</script>

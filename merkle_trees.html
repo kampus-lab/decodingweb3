@@ -1,0 +1,529 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --proof:#2F5D6B;
+    --good:#2F5D45;
+    --bad:#8C2F39;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.4vw,42px);
+    line-height:1.08; margin:0 0 12px; max-width:640px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose sections ---------- */
+  .section{margin:34px 32px 0;}
+  .section h2{
+    font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);
+  }
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+
+  /* ---------- Diagram panel ---------- */
+  .diagram-panel{
+    margin:18px 14px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:20px 6px 24px;
+  }
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 18px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .commit-banner{
+    display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center;
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px;
+    padding:12px 16px; margin-bottom:20px; font-family:'IBM Plex Mono',monospace; font-size:12px;
+  }
+  .commit-banner .label{color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; font-size:10.5px;}
+  .commit-banner .hash{color:var(--ink); word-break:break-all;}
+  .commit-banner .status{font-weight:600; padding:3px 9px; border-radius:10px; white-space:nowrap;}
+  .commit-banner .status.match{background:rgba(47,93,69,0.12); color:var(--good);}
+  .commit-banner .status.mismatch{background:rgba(140,47,57,0.12); color:var(--bad);}
+  .lock-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 11px; border-radius:12px;
+    border:1px solid var(--gold); background:none; color:var(--gold); cursor:pointer; white-space:nowrap;
+  }
+  .lock-btn:hover{background:var(--gold); color:#fff;}
+
+  .tree-scroll{overflow-x:auto; padding-bottom:6px;}
+  .tree-scroll::-webkit-scrollbar{height:8px;}
+  .tree-scroll::-webkit-scrollbar-track{background:var(--paper-dim);}
+  .tree-scroll::-webkit-scrollbar-thumb{background:var(--rule-strong); border-radius:4px;}
+  .scroll-hint{display:none; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); text-align:center; margin:4px 0 0;}
+  ul.tree, ul.tree ul{
+    padding-top:22px; position:relative; display:flex; justify-content:center; margin:0; list-style:none;
+  }
+  ul.tree{padding-left:0;}
+  ul.tree li{
+    text-align:center; list-style:none; position:relative;
+    padding:16px 2px 0 2px; display:flex; flex-direction:column; align-items:center;
+  }
+  ul.tree li::before, ul.tree li::after{
+    content:''; position:absolute; top:0; right:50%;
+    border-top:2px solid var(--rule-strong); width:50%; height:16px;
+  }
+  ul.tree li::after{ right:auto; left:50%; border-left:2px solid var(--rule-strong); }
+  ul.tree li:only-child{ padding-top:0; }
+  ul.tree li:only-child::before, ul.tree li:only-child::after{ display:none; }
+  ul.tree li:first-child::before, ul.tree li:last-child::after{ border:0 none; }
+  ul.tree li:last-child::before{ border-right:2px solid var(--rule-strong); border-radius:0 5px 0 0; }
+  ul.tree li:first-child::after{ border-radius:5px 0 0 0; }
+  ul.tree ul::before{
+    content:''; position:absolute; top:0; left:50%;
+    border-left:2px solid var(--rule-strong); width:0; height:16px;
+  }
+
+  .node{
+    min-width:50px; border:1.6px solid var(--rule-strong); background:#fff; border-radius:5px;
+    padding:4px 4px; font-family:'IBM Plex Mono',monospace; transition:border-color .2s, background .2s, box-shadow .2s;
+  }
+  .node .node-label{font-size:8px; letter-spacing:.03em; color:var(--ink-soft); text-transform:uppercase; margin-bottom:3px;}
+  .node .node-hash{font-size:8.5px; color:var(--ink); word-break:break-all; cursor:default;}
+  .node.root{border-color:var(--gold); border-width:2px;}
+  .node.claim-path{border-color:var(--gold); box-shadow:0 0 0 2px rgba(156,122,36,0.25); background:#FBF8EF;}
+  .node.proof-sibling{border-color:var(--proof); box-shadow:0 0 0 2px rgba(47,93,107,0.18); background:#F1F6F7;}
+
+  .leaf-input{
+    width:42px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:3px 3px;
+    border:1px solid var(--rule-strong); border-radius:3px; background:#fff; color:var(--ink); margin-bottom:3px;
+    text-align:center;
+  }
+  .leaf-input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .proof-btn{
+    margin-top:3px; font-family:'IBM Plex Mono',monospace; font-size:7.5px; letter-spacing:.01em;
+    background:none; border:1px solid var(--rule-strong); color:var(--ink-soft); border-radius:8px;
+    padding:1px 3px; cursor:pointer; white-space:nowrap;
+  }
+  .proof-btn:hover{border-color:var(--gold); color:var(--gold);}
+  .proof-btn.active{background:var(--gold); border-color:var(--gold); color:#fff;}
+
+  .legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .swatch{width:11px;height:11px;border-radius:3px; display:inline-block; border:1.6px solid;}
+  .swatch.claim{border-color:var(--gold); background:#FBF8EF;}
+  .swatch.proof{border-color:var(--proof); background:#F1F6F7;}
+
+  .proof-panel{
+    margin-top:18px; background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:14px 16px;
+    display:none;
+  }
+  .proof-panel.show{display:block;}
+  .proof-panel h3{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 8px;}
+  .proof-panel ol{margin:0; padding-left:20px; font-size:14px;}
+  .proof-panel li{margin-bottom:5px;}
+  .proof-panel .summary{margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft);}
+
+  .note-box{
+    margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);
+  }
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+
+  .footer-note{
+    margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+
+  @media (max-width:560px){
+    .node{min-width:64px; padding:5px 5px;}
+    .leaf-input{width:54px; font-size:10px;}
+    .node .node-hash{font-size:9px;}
+  }
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Foundations — Topic 03 of 40</p>
+  <h1>Merkle Trees &amp; <em>Data Structures</em></h1>
+  <p>The structure that lets a blockchain prove a single transaction is real — without making anyone download the whole chain to check it.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>One hash, standing in for everything</h2>
+    <p>A Merkle tree takes a pile of data — transactions, files, anything — and hashes it down into a single fixed-length fingerprint called the <strong>root</strong>. It does this in layers: every piece of data gets hashed individually, then pairs of those hashes get hashed together, then pairs of <em>those</em> get hashed together, and so on, until only one hash is left at the top.</p>
+    <p class="soft">The shape is just a binary tree. The substance is that every node above the leaves is nothing but the hash of its two children.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Why blockchains use it</p>
+    <h2>Cheap proof, expensive forgery</h2>
+    <p>A block header only needs to store the root — a few dozen bytes — no matter how many thousands of transactions are inside. Change a single transaction anywhere in the tree, and the hash above it changes, which changes the hash above <em>that</em>, all the way up to the root. The root can no longer match what everyone already agreed on, so tampering is caught instantly, without re-checking every transaction by hand.</p>
+    <p>Better still, you can prove one transaction belongs in a block by sharing just a handful of sibling hashes — a <strong>Merkle proof</strong> — instead of the entire block. The diagram below lets you try both of those things yourself.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: edit any leaf below and watch the root change. Then click "show proof" under any leaf to see the minimum set of hashes needed to verify it.</p>
+
+    <div class="commit-banner">
+      <span><span class="label">Committed root</span><br><span class="hash" id="committedHashDisplay">computing…</span></span>
+      <span><span class="label">Current root</span><br><span class="hash" id="currentHashDisplay">computing…</span></span>
+      <span class="status match" id="statusBadge">checking…</span>
+      <button class="lock-btn" id="lockBtn">🔒 Lock current root as committed</button>
+    </div>
+
+    <div class="tree-scroll">
+      <ul class="tree" id="merkleTree">
+        <li>
+          <div class="node root" id="node-root" data-id="root">
+            <div class="node-label">Root</div>
+            <div class="node-hash" id="hash-root">…</div>
+          </div>
+          <ul>
+            <li>
+              <div class="node" id="node-L" data-id="L">
+                <div class="node-label">L</div>
+                <div class="node-hash" id="hash-L">…</div>
+              </div>
+              <ul>
+                <li>
+                  <div class="node" id="node-LL" data-id="LL">
+                    <div class="node-label">LL</div>
+                    <div class="node-hash" id="hash-LL">…</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="node" id="node-0" data-id="0">
+                        <input class="leaf-input" id="leaf-input-0" value="Tx 1" aria-label="Leaf 1 data">
+                        <div class="node-hash" id="hash-0">…</div>
+                        <button class="proof-btn" data-leaf="0">show proof</button>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="node" id="node-1" data-id="1">
+                        <input class="leaf-input" id="leaf-input-1" value="Tx 2" aria-label="Leaf 2 data">
+                        <div class="node-hash" id="hash-1">…</div>
+                        <button class="proof-btn" data-leaf="1">show proof</button>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="node" id="node-LR" data-id="LR">
+                    <div class="node-label">LR</div>
+                    <div class="node-hash" id="hash-LR">…</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="node" id="node-2" data-id="2">
+                        <input class="leaf-input" id="leaf-input-2" value="Tx 3" aria-label="Leaf 3 data">
+                        <div class="node-hash" id="hash-2">…</div>
+                        <button class="proof-btn" data-leaf="2">show proof</button>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="node" id="node-3" data-id="3">
+                        <input class="leaf-input" id="leaf-input-3" value="Tx 4" aria-label="Leaf 4 data">
+                        <div class="node-hash" id="hash-3">…</div>
+                        <button class="proof-btn" data-leaf="3">show proof</button>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <div class="node" id="node-R" data-id="R">
+                <div class="node-label">R</div>
+                <div class="node-hash" id="hash-R">…</div>
+              </div>
+              <ul>
+                <li>
+                  <div class="node" id="node-RL" data-id="RL">
+                    <div class="node-label">RL</div>
+                    <div class="node-hash" id="hash-RL">…</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="node" id="node-4" data-id="4">
+                        <input class="leaf-input" id="leaf-input-4" value="Tx 5" aria-label="Leaf 5 data">
+                        <div class="node-hash" id="hash-4">…</div>
+                        <button class="proof-btn" data-leaf="4">show proof</button>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="node" id="node-5" data-id="5">
+                        <input class="leaf-input" id="leaf-input-5" value="Tx 6" aria-label="Leaf 6 data">
+                        <div class="node-hash" id="hash-5">…</div>
+                        <button class="proof-btn" data-leaf="5">show proof</button>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <div class="node" id="node-RR" data-id="RR">
+                    <div class="node-label">RR</div>
+                    <div class="node-hash" id="hash-RR">…</div>
+                  </div>
+                  <ul>
+                    <li>
+                      <div class="node" id="node-6" data-id="6">
+                        <input class="leaf-input" id="leaf-input-6" value="Tx 7" aria-label="Leaf 7 data">
+                        <div class="node-hash" id="hash-6">…</div>
+                        <button class="proof-btn" data-leaf="6">show proof</button>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="node" id="node-7" data-id="7">
+                        <input class="leaf-input" id="leaf-input-7" value="Tx 8" aria-label="Leaf 8 data">
+                        <div class="node-hash" id="hash-7">…</div>
+                        <button class="proof-btn" data-leaf="7">show proof</button>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <p class="scroll-hint" id="scrollHint">← scroll sideways to see the whole tree →</p>
+
+    <div class="legend">
+      <span><span class="swatch claim"></span> Your data's hash, all the way to the root</span>
+      <span><span class="swatch proof"></span> Sibling hashes supplied as proof</span>
+    </div>
+
+    <div class="proof-panel" id="proofPanel">
+      <h3>Merkle proof for the selected leaf</h3>
+      <ol id="proofSteps"></ol>
+      <p class="summary" id="proofSummary"></p>
+    </div>
+  </div>
+
+  <div class="note-box">
+    Real implementations (Bitcoin, for instance) hash raw binary data rather than hex text, and pad odd numbers of leaves — but the principle above is exactly what's running underneath. This demo uses real SHA-256 in your browser, so the hashes you see are genuine, not illustrations.
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where else this shows up</p>
+    <h2>Not just blockchains</h2>
+    <ul class="uses-list">
+      <li><strong>Bitcoin</strong> hashes every block's transactions into a Merkle root stored in the block header, so light clients can verify a payment without downloading the full block.</li>
+      <li><strong>Ethereum</strong> goes further with a Merkle Patricia trie — a Merkle tree merged with a lookup structure — to commit to the entire account and storage state, not just transactions.</li>
+      <li><strong>Git</strong> is a Merkle DAG: every commit, tree, and file blob is content-addressed by its hash, which is why changing one line anywhere changes the commit hash.</li>
+      <li><strong>IPFS</strong> splits files into chunks and links them the same way, so any piece of content can be verified independently by its hash.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">Diagram runs entirely in your browser using the Web Crypto API (SHA-256) — nothing you type here is sent anywhere.</p>
+</div>
+
+<script>
+(function(){
+  const PARENT_OF = {
+    0:'LL', 1:'LL', 2:'LR', 3:'LR', 4:'RL', 5:'RL', 6:'RR', 7:'RR',
+    LL:'L', LR:'L', RL:'R', RR:'R',
+    L:'root', R:'root'
+  };
+  const SIBLING_OF = {
+    0:1, 1:0, 2:3, 3:2, 4:5, 5:4, 6:7, 7:6,
+    LL:'LR', LR:'LL', RL:'RR', RR:'RL',
+    L:'R', R:'L'
+  };
+  const LEAF_PAIRS = [['LL',[0,1]], ['LR',[2,3]], ['RL',[4,5]], ['RR',[6,7]]];
+  const LEVEL1_PAIRS = [['L',['LL','LR']], ['R',['RL','RR']]];
+
+  let committedRoot = null;
+  let currentRoot = null;
+  let selectedLeaf = null;
+
+  const leafInputs = [0,1,2,3,4,5,6,7].map(i => document.getElementById('leaf-input-'+i));
+  const lockBtn = document.getElementById('lockBtn');
+  const proofPanel = document.getElementById('proofPanel');
+  const proofSteps = document.getElementById('proofSteps');
+  const proofSummary = document.getElementById('proofSummary');
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function truncate(hex, len){
+    const n = len || 10;
+    return hex.slice(0,n) + '…';
+  }
+
+  function setHash(id, hex){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = truncate(hex, 6);
+    el.title = hex;
+    el.dataset.full = hex;
+  }
+
+  async function recomputeAll(){
+    const leafVals = leafInputs.map(inp => inp.value);
+    const leafHashes = await Promise.all(leafVals.map(v => sha256Hex(v)));
+    leafHashes.forEach((h,i) => setHash('hash-'+i, h));
+
+    const lvl2 = {};
+    for(const [id, pair] of LEAF_PAIRS){
+      lvl2[id] = await sha256Hex(leafHashes[pair[0]] + leafHashes[pair[1]]);
+      setHash('hash-'+id, lvl2[id]);
+    }
+
+    const lvl1 = {};
+    for(const [id, pair] of LEVEL1_PAIRS){
+      lvl1[id] = await sha256Hex(lvl2[pair[0]] + lvl2[pair[1]]);
+      setHash('hash-'+id, lvl1[id]);
+    }
+
+    const root = await sha256Hex(lvl1['L'] + lvl1['R']);
+    setHash('hash-root', root);
+    currentRoot = root;
+
+    if(committedRoot === null) committedRoot = root;
+    updateBanner();
+    if(selectedLeaf !== null) renderProof(selectedLeaf);
+  }
+
+  function updateBanner(){
+    document.getElementById('committedHashDisplay').textContent = committedRoot ? truncate(committedRoot) : '…';
+    document.getElementById('committedHashDisplay').title = committedRoot || '';
+    document.getElementById('currentHashDisplay').textContent = currentRoot ? truncate(currentRoot) : '…';
+    document.getElementById('currentHashDisplay').title = currentRoot || '';
+    const badge = document.getElementById('statusBadge');
+    if(currentRoot === committedRoot){
+      badge.textContent = '✅ Match — data is intact';
+      badge.className = 'status match';
+    } else {
+      badge.textContent = '⚠ Mismatch — tampering detected';
+      badge.className = 'status mismatch';
+    }
+  }
+
+  function clearHighlights(){
+    document.querySelectorAll('.node.claim-path, .node.proof-sibling').forEach(n => {
+      n.classList.remove('claim-path','proof-sibling');
+    });
+  }
+
+  function walkPath(leafIndex){
+    const path = [];
+    let cur = leafIndex;
+    while(cur !== 'root'){
+      path.push({self: cur, sibling: SIBLING_OF[cur]});
+      cur = PARENT_OF[cur];
+    }
+    path.push({self: 'root', sibling: null});
+    return path;
+  }
+
+  function labelFor(id){
+    if(typeof id === 'number') return 'Leaf ' + (id+1);
+    if(id === 'root') return 'Root';
+    return id;
+  }
+
+  function renderProof(leafIndex){
+    clearHighlights();
+    const path = walkPath(leafIndex);
+    const stepsHTML = [];
+    path.forEach(step => {
+      const selfNode = document.getElementById('node-'+step.self);
+      if(selfNode) selfNode.classList.add('claim-path');
+      if(step.sibling !== null && step.sibling !== undefined){
+        const sibNode = document.getElementById('node-'+step.sibling);
+        if(sibNode) sibNode.classList.add('proof-sibling');
+        stepsHTML.push(`<li>Combine your hash with <strong>${labelFor(step.sibling)}</strong>'s hash → produces <strong>${labelFor(PARENT_OF[step.self])}</strong>.</li>`);
+      }
+    });
+    proofSteps.innerHTML = stepsHTML.join('');
+    const proofCount = path.filter(s => s.sibling !== null && s.sibling !== undefined).length;
+    proofSummary.textContent = `Only ${proofCount} sibling hashes are needed to prove ${labelFor(leafIndex)} is in this tree — instead of all 8 leaves.`;
+    proofPanel.classList.add('show');
+  }
+
+  function selectLeaf(idx){
+    document.querySelectorAll('.proof-btn').forEach(b => b.classList.remove('active'));
+    if(selectedLeaf === idx){
+      selectedLeaf = null;
+      clearHighlights();
+      proofPanel.classList.remove('show');
+      return;
+    }
+    selectedLeaf = idx;
+    const btn = document.querySelector(`.proof-btn[data-leaf="${idx}"]`);
+    if(btn) btn.classList.add('active');
+    renderProof(idx);
+  }
+
+  document.querySelectorAll('.proof-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectLeaf(parseInt(btn.dataset.leaf,10)));
+  });
+
+  let debounceTimer = null;
+  leafInputs.forEach(inp => {
+    inp.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(recomputeAll, 150);
+    });
+  });
+
+  lockBtn.addEventListener('click', () => {
+    committedRoot = currentRoot;
+    updateBanner();
+  });
+
+  function checkOverflow(){
+    const scroller = document.querySelector('.tree-scroll');
+    const hint = document.getElementById('scrollHint');
+    if(!scroller || !hint) return;
+    hint.style.display = (scroller.scrollWidth > scroller.clientWidth + 4) ? 'block' : 'none';
+  }
+  window.addEventListener('resize', checkOverflow);
+
+  recomputeAll();
+  setTimeout(checkOverflow, 300);
+})();
+</script>

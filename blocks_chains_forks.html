@@ -1,0 +1,453 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --good:#2F5D45;
+    --bad:#8C2F39;
+    --orphan:#8A8170;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.4vw,42px);
+    line-height:1.08; margin:0 0 12px; max-width:640px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+
+  .anatomy{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0 18px;}
+  .anatomy .box{background:var(--paper-dim); border:1px solid var(--rule); border-radius:6px; padding:12px 14px;}
+  .anatomy .box h4{margin:0 0 6px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--gold);}
+  .anatomy .box ul{margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-soft);}
+  .anatomy .box li{margin-bottom:4px;}
+  @media (max-width:620px){ .anatomy{grid-template-columns:1fr;} }
+
+  /* ---------- Diagram panels ---------- */
+  .diagram-panel{
+    margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:22px 18px 24px;
+  }
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 18px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .chain-banner{
+    display:flex; flex-wrap:wrap; gap:10px 24px; align-items:center;
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px;
+    padding:11px 16px; margin-bottom:18px; font-family:'IBM Plex Mono',monospace; font-size:12px;
+  }
+  .chain-banner .status{font-weight:600; padding:3px 9px; border-radius:10px; white-space:nowrap;}
+  .chain-banner .status.ok{background:rgba(47,93,69,0.12); color:var(--good);}
+  .chain-banner .status.broken{background:rgba(140,47,57,0.12); color:var(--bad);}
+
+  .chain-scroll{overflow-x:auto; padding-bottom:8px;}
+  .chain-row{display:flex; align-items:center; gap:0; min-width:max-content;}
+  .block-box{
+    flex:0 0 auto; width:142px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:6px;
+    padding:10px; transition:border-color .2s;
+  }
+  .block-box.genesis{border-color:var(--gold);}
+  .block-box.invalid{border-color:var(--bad);}
+  .block-box h5{margin:0 0 6px; font-family:'Fraunces',serif; font-weight:600; font-size:13px;}
+  .block-box .field-label{font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--ink-soft); text-transform:uppercase; margin:6px 0 2px;}
+  .block-box input[type=text]{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:4px 5px;
+    border:1px solid var(--rule-strong); border-radius:3px; background:#fff; color:var(--ink);
+  }
+  .block-box input[type=text]:disabled{background:var(--paper-dim); color:var(--ink-soft);}
+  .block-box .hash-field{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink); word-break:break-all;}
+  .block-box .remine-btn{
+    margin-top:8px; width:100%; font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:5px;
+    border-radius:4px; border:1px solid var(--bad); background:#fff; color:var(--bad); cursor:pointer;
+  }
+  .block-box .remine-btn:hover{background:var(--bad); color:#fff;}
+
+  .chain-link{
+    flex:0 0 auto; width:34px; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--good);
+  }
+  .chain-link.broken{color:var(--bad);}
+
+  /* ---------- Fork diagram ---------- */
+  .fork-trunk{display:flex; align-items:center; gap:0; margin-bottom:6px; min-width:max-content;}
+  .fork-area{display:flex; flex-direction:column; gap:10px; margin-top:6px;}
+  .fork-branch-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .branch-tag{
+    flex:0 0 auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
+    padding:5px 10px; border-radius:12px; white-space:nowrap;
+  }
+  .branch-tag.a{background:rgba(156,122,36,0.15); color:var(--gold);}
+  .branch-tag.b{background:rgba(47,93,107,0.15); color:#2F5D6B;}
+  .branch-blocks{display:flex; align-items:center; gap:0; overflow-x:auto;}
+  .mini-block{
+    flex:0 0 auto; min-width:54px; text-align:center; background:#fff; border:1.6px solid var(--rule-strong);
+    border-radius:5px; padding:6px 5px; font-family:'IBM Plex Mono',monospace; font-size:10px; margin-right:6px;
+  }
+  .mini-block.accepted{border-color:var(--good); background:#F1F6F0;}
+  .mini-block.orphaned{border-color:var(--orphan); background:var(--paper-dim); color:var(--orphan); opacity:.7;}
+  .mini-arrow{flex:0 0 auto; font-family:'IBM Plex Mono',monospace; color:var(--rule-strong); margin-right:6px;}
+  .fork-controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .mine-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 14px; border-radius:14px; cursor:pointer;
+  }
+  .mine-btn.a{border:1.5px solid var(--gold); background:#fff; color:var(--gold);}
+  .mine-btn.a:hover{background:var(--gold); color:#fff;}
+  .mine-btn.b{border:1.5px solid #2F5D6B; background:#fff; color:#2F5D6B;}
+  .mine-btn.b:hover{background:#2F5D6B; color:#fff;}
+  .fork-status{
+    margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:12px; background:#fff;
+    border:1px solid var(--rule-strong); border-radius:4px; padding:10px 14px;
+  }
+
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+    background:none; border:1px solid var(--rule-strong); border-radius:12px; padding:6px 12px; cursor:pointer;
+  }
+  .reset-btn:hover{background:#fff;}
+  .controls-row{display:flex; justify-content:flex-end; margin-top:14px;}
+
+  .scroll-hint{display:none; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); text-align:center; margin:6px 0 0;}
+
+  .note-box{
+    margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);
+  }
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+
+  .footer-note{
+    margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Core Blockchain Mechanics — Topic 06 of 40</p>
+  <h1>Blocks, Chains &amp; <em>Forks</em></h1>
+  <p>What's actually inside a block, why stacking them into a chain makes history expensive to rewrite, and what happens when two blocks tie for the same spot.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What's in a block</p>
+    <h2>A header, and the data it vouches for</h2>
+    <p>Every block has two parts: a small <strong>header</strong> that's cheap to check, and a <strong>body</strong> full of transactions that the header vouches for.</p>
+    <div class="anatomy">
+      <div class="box">
+        <h4>Header</h4>
+        <ul>
+          <li>Hash of the <em>previous</em> block — this is what makes it a chain</li>
+          <li>A Merkle root summarizing every transaction inside (see Merkle Trees)</li>
+          <li>Timestamp</li>
+          <li>Nonce / proof data the consensus mechanism needs</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h4>Body</h4>
+        <ul>
+          <li>The full list of transactions this block includes</li>
+          <li>Nothing here is trusted directly — it's only valid if it hashes into the Merkle root the header claims</li>
+        </ul>
+      </div>
+    </div>
+    <p class="soft">Notice the header doesn't store the transactions themselves — just a hash that summarizes them. That's the Merkle root doing exactly the job described in the last topic.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Why a chain, not just a pile of blocks</p>
+    <h2>Each block locks in everything before it</h2>
+    <p>Because every block's header stores the hash of the block before it, the blocks form a chain of commitments. Changing anything in an old block changes that block's hash — which no longer matches what the next block claims as its "previous hash." The break is immediately visible, and fixing it means recomputing every block after the change, not just the one you edited.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: edit any block's data below and watch the chain break right after it. Then re-mine forward to fix it — notice how much work that takes the deeper the edit is.</p>
+
+    <div class="chain-banner">
+      <span>Chain status:</span>
+      <span class="status ok" id="chainStatus">✅ all links valid</span>
+    </div>
+
+    <div class="chain-scroll" id="chainScrollWrap">
+      <div class="chain-row" id="chainRow"></div>
+    </div>
+    <p class="scroll-hint" id="chainScrollHint">← scroll sideways to see the whole chain →</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">When two blocks tie</p>
+    <h2>Forks: the network briefly disagrees</h2>
+    <p>Sometimes two miners or validators produce a valid next block at almost the same moment. For a short while, different nodes see different "tips" of the chain — a <strong>fork</strong>. Most networks resolve this with a simple rule: whichever branch ends up with more accumulated work (or more stake, more votes — depending on the consensus mechanism) wins. Blocks on the losing branch are <strong>orphaned</strong>: discarded, with their transactions returned to the pool to be included later.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: mine on Branch A or Branch B and see which one the network ends up accepting once it's longer.</p>
+
+    <div class="chain-scroll" id="forkScrollWrap">
+      <div class="fork-trunk" id="forkTrunk"></div>
+    </div>
+    <p class="scroll-hint" id="forkScrollHint">← scroll sideways to see the full trunk →</p>
+    <div class="fork-area">
+      <div class="fork-branch-row">
+        <span class="branch-tag a">Branch A</span>
+        <div class="branch-blocks" id="branchARow"></div>
+      </div>
+      <div class="fork-branch-row">
+        <span class="branch-tag b">Branch B</span>
+        <div class="branch-blocks" id="branchBRow"></div>
+      </div>
+    </div>
+    <div class="fork-controls">
+      <button class="mine-btn a" id="mineA">⛏ Mine next on Branch A</button>
+      <button class="mine-btn b" id="mineB">⛏ Mine next on Branch B</button>
+    </div>
+    <div class="fork-status" id="forkStatus"></div>
+
+    <div class="controls-row">
+      <button class="reset-btn" id="resetForkBtn">↺ Reset fork</button>
+    </div>
+  </div>
+
+  <div class="note-box">
+    These natural, temporary forks resolve themselves within a block or two. <strong>Hard forks</strong> and <strong>soft forks</strong> are a different thing entirely — deliberate protocol changes. A hard fork changes the rules in a way old software can't validate, permanently splitting the chain in two if not everyone upgrades (Bitcoin / Bitcoin Cash, Ethereum / Ethereum Classic). A soft fork tightens the rules in a backward-compatible way, so old nodes keep accepting the new blocks without even needing to upgrade.
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>Confirmations exist because of this</h2>
+    <ul class="uses-list">
+      <li><strong>"Wait for 6 confirmations"</strong> on Bitcoin is just waiting for 6 blocks to pile on top of yours, so an attacker would need to out-mine the entire network to ever orphan it.</li>
+      <li><strong>Proof-of-stake chains with finality</strong> (much of modern Ethereum, Cosmos) avoid long fork uncertainty by having validators explicitly vote a block as final — after that vote, it's a hard guarantee, not a probability.</li>
+      <li>This is the same CAP-theorem tension from two topics ago: a chain that's briefly forked is choosing <strong>availability</strong> over instant consistency, and resolving the disagreement later.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">The chain diagram above uses real SHA-256 (Web Crypto API) in your browser. The fork diagram is a simplified length-race model — real consensus rules vary by protocol.</p>
+</div>
+
+<script>
+(function(){
+  /* ---------------- Chain-of-blocks demo ---------------- */
+  const GENESIS_PREV = '0'.repeat(64);
+  const initialData = [
+    'Genesis Block',
+    'Alice → Bob: 2',
+    'Bob → Carol: 1',
+    'Carol → Dave: 0.5',
+    'Dave → Eve: 3'
+  ];
+
+  // each block: { data, storedPrevHash }  — storedPrevHash is frozen at "mine time"
+  let blocks = [];
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function truncate(hex, n){ return hex.slice(0, n || 8) + '…'; }
+
+  async function liveHash(i){
+    return sha256Hex(blocks[i].storedPrevHash + blocks[i].data);
+  }
+
+  async function initChain(){
+    blocks = initialData.map((d,i) => ({ data: d, storedPrevHash: i === 0 ? GENESIS_PREV : '' }));
+    let prevLive = await liveHash(0);
+    for(let i = 1; i < blocks.length; i++){
+      blocks[i].storedPrevHash = prevLive;
+      prevLive = await liveHash(i);
+    }
+    await renderChain();
+  }
+
+  async function findFirstBreak(){
+    let prevLive = await liveHash(0);
+    for(let i = 1; i < blocks.length; i++){
+      if(blocks[i].storedPrevHash !== prevLive) return i;
+      prevLive = await liveHash(i);
+    }
+    return -1;
+  }
+
+  async function renderChain(){
+    const breakAt = await findFirstBreak();
+    const statusEl = document.getElementById('chainStatus');
+    if(breakAt === -1){
+      statusEl.textContent = '✅ all links valid';
+      statusEl.className = 'status ok';
+    } else {
+      statusEl.textContent = `⚠ broken from Block ${breakAt} onward`;
+      statusEl.className = 'status broken';
+    }
+
+    const row = document.getElementById('chainRow');
+    const liveHashes = [];
+    for(let i = 0; i < blocks.length; i++) liveHashes.push(await liveHash(i));
+
+    let html = '';
+    for(let i = 0; i < blocks.length; i++){
+      const isBroken = breakAt !== -1 && i >= breakAt;
+      if(i > 0){
+        const linkOk = blocks[i].storedPrevHash === liveHashes[i-1];
+        html += `<div class="chain-link${linkOk ? '' : ' broken'}">${linkOk ? '→' : '⛔'}</div>`;
+      }
+      html += `
+        <div class="block-box${i===0?' genesis':''}${isBroken?' invalid':''}">
+          <h5>${i===0 ? 'Genesis' : 'Block ' + i}</h5>
+          <div class="field-label">Data</div>
+          <input type="text" class="block-data-input" data-idx="${i}" value="${blocks[i].data.replace(/"/g,'&quot;')}" ${i===0?'':''}>
+          <div class="field-label">Prev hash (stored)</div>
+          <div class="hash-field">${i===0 ? 'genesis' : truncate(blocks[i].storedPrevHash,8)}</div>
+          <div class="field-label">This block's hash</div>
+          <div class="hash-field">${truncate(liveHashes[i],8)}</div>
+          ${isBroken && i === breakAt ? `<button class="remine-btn" data-idx="${i}">🔧 Re-mine from here</button>` : ''}
+        </div>`;
+    }
+    row.innerHTML = html;
+
+    row.querySelectorAll('.block-data-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const idx = parseInt(inp.dataset.idx, 10);
+        blocks[idx].data = inp.value;
+        renderChain();
+      });
+    });
+    row.querySelectorAll('.remine-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        let prevLive = await liveHash(idx - 1);
+        for(let i = idx; i < blocks.length; i++){
+          blocks[i].storedPrevHash = prevLive;
+          prevLive = await liveHash(i);
+        }
+        renderChain();
+      });
+    });
+    checkAllOverflow();
+  }
+
+  function pluralize(n){ return n === 1 ? 'block' : 'blocks'; }
+
+  function checkOverflowFor(scrollId, hintId){
+    const scroller = document.getElementById(scrollId);
+    const hint = document.getElementById(hintId);
+    if(!scroller || !hint) return;
+    hint.style.display = (scroller.scrollWidth > scroller.clientWidth + 4) ? 'block' : 'none';
+  }
+  function checkAllOverflow(){
+    checkOverflowFor('chainScrollWrap', 'chainScrollHint');
+    checkOverflowFor('forkScrollWrap', 'forkScrollHint');
+  }
+  window.addEventListener('resize', checkAllOverflow);
+
+  /* ---------------- Fork demo ---------------- */
+  const TRUNK_HEIGHT = 4;
+  let branchA = ['Block 5A'];
+  let branchB = ['Block 5B'];
+
+  function renderTrunk(){
+    let html = '';
+    for(let h = 1; h <= TRUNK_HEIGHT; h++){
+      if(h > 1) html += `<div class="mini-arrow">→</div>`;
+      html += `<div class="mini-block accepted">Block ${h}</div>`;
+    }
+    html += `<div class="mini-arrow">⑂</div>`;
+    document.getElementById('forkTrunk').innerHTML = html;
+  }
+
+  function branchHTML(list, accepted){
+    return list.map((label,i) => {
+      let cls = 'mini-block';
+      if(accepted === true) cls += ' accepted';
+      if(accepted === false) cls += ' orphaned';
+      const arrow = i > 0 ? '<div class="mini-arrow">→</div>' : '';
+      return arrow + `<div class="${cls}">${label}</div>`;
+    }).join('');
+  }
+
+  function renderFork(){
+    let acceptedA = null, acceptedB = null, statusText = '';
+    if(branchA.length > branchB.length){
+      acceptedA = true; acceptedB = false;
+      statusText = `✅ Network accepts Branch A (${branchA.length} blocks vs ${branchB.length}). Branch B's blocks are orphaned — their transactions return to the pending pool.`;
+    } else if(branchB.length > branchA.length){
+      acceptedA = false; acceptedB = true;
+      statusText = `✅ Network accepts Branch B (${branchB.length} blocks vs ${branchA.length}). Branch A's blocks are orphaned — their transactions return to the pending pool.`;
+    } else {
+      statusText = `⚖ Tie — both branches have ${branchA.length} ${pluralize(branchA.length)}. The network hasn't converged yet; whichever gets the next block wins.`;
+    }
+    document.getElementById('branchARow').innerHTML = branchHTML(branchA, acceptedA);
+    document.getElementById('branchBRow').innerHTML = branchHTML(branchB, acceptedB);
+    document.getElementById('forkStatus').textContent = statusText;
+    checkAllOverflow();
+  }
+
+  document.getElementById('mineA').addEventListener('click', () => {
+    branchA.push('Block ' + (TRUNK_HEIGHT + branchA.length + 1) + 'A');
+    renderFork();
+  });
+  document.getElementById('mineB').addEventListener('click', () => {
+    branchB.push('Block ' + (TRUNK_HEIGHT + branchB.length + 1) + 'B');
+    renderFork();
+  });
+  document.getElementById('resetForkBtn').addEventListener('click', () => {
+    branchA = ['Block 5A'];
+    branchB = ['Block 5B'];
+    renderFork();
+  });
+
+  initChain();
+  renderTrunk();
+  renderFork();
+  setTimeout(checkAllOverflow, 300);
+})();
+</script>
