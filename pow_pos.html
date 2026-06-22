@@ -1,0 +1,1331 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --good:#2F5D45;
+    --bad:#8C2F39;
+    --proof:#2F5D6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,4.2vw,40px);
+    line-height:1.1; margin:0 0 12px; max-width:660px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+
+  .bet-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0 18px;}
+  .bet-grid .box{background:var(--paper-dim); border:1px solid var(--rule); border-radius:6px; padding:12px 14px;}
+  .bet-grid .box h4{margin:0 0 6px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--gold);}
+  .bet-grid .box p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+  @media (max-width:640px){ .bet-grid{grid-template-columns:1fr;} }
+
+  /* ---------- Diagram panel ---------- */
+  .diagram-panel{
+    margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:22px 18px 24px;
+  }
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 16px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .mode-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 13px; border-radius:14px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink-soft); cursor:pointer;
+  }
+  .chip.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+
+  .node-stage{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .node-box{
+    flex:1 1 130px; max-width:160px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:7px;
+    padding:11px; text-align:center; transition:border-color .2s, opacity .2s;
+  }
+  .node-box h5{margin:0 0 6px; font-family:'Fraunces',serif; font-weight:600; font-size:14px;}
+  .node-box .meta{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); margin-bottom:6px;}
+  .node-box .bar-track{height:10px; background:var(--paper-dim); border:1px solid var(--rule); border-radius:5px; overflow:hidden; margin-bottom:6px;}
+  .node-box .bar-fill{height:100%; background:var(--gold); width:0%; transition:width .08s linear;}
+  .node-box .stake-fill{background:var(--proof); transition:width .3s ease;}
+  .node-box .status-line{font-family:'IBM Plex Mono',monospace; font-size:10.5px; min-height:14px; color:var(--ink-soft);}
+  .node-box.winner{border-color:var(--gold); border-width:2px; box-shadow:0 0 0 2px rgba(156,122,36,0.2);}
+  .node-box.discarded{opacity:.45;}
+  .node-box.slashed{opacity:.45; border-color:var(--bad);}
+  .node-box .toggle-byz{
+    margin-top:4px; width:100%; font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:4px 6px;
+    border-radius:10px; cursor:pointer; border:1px solid var(--rule-strong); background:#fff; color:var(--good);
+  }
+  .node-box .toggle-byz.is-byz{border-color:var(--bad); color:var(--bad);}
+
+  .stage-controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
+  .run-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:9px 16px; border-radius:14px;
+    border:1.5px solid var(--cover); background:var(--cover); color:var(--paper); cursor:pointer;
+  }
+  .run-btn:disabled{opacity:.5; cursor:not-allowed;}
+  .reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+    background:none; border:1px solid var(--rule-strong); border-radius:12px; padding:7px 12px; cursor:pointer;
+  }
+  .reset-btn:hover{background:#fff;}
+  .tally-line{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-bottom:14px;}
+
+  .consensus-log{
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:10px 14px;
+    max-height:150px; overflow-y:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);
+  }
+  .consensus-log p{margin:0 0 5px;}
+  .consensus-log p:last-child{margin-bottom:0;}
+
+  .note-box{
+    margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);
+  }
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+
+  .footer-note{
+    margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+
+  /* ---------- Proof of Stake deep-dive (animated) ---------- */
+  .pos-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:18px;}
+  .pos-epoch-counter{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-left:auto;}
+
+  .pos-chain-strip{
+    display:flex; gap:8px; align-items:center; overflow-x:auto; background:#fff;
+    border:1px solid var(--rule-strong); border-radius:6px; padding:10px; margin-bottom:20px; min-height:56px;
+  }
+  .pos-chain-placeholder{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); padding:0 8px; white-space:nowrap;}
+  .pos-chain-block{
+    flex:0 0 auto; width:54px; height:38px; border-radius:5px; background:var(--paper-dim);
+    border:1.6px dashed var(--rule-strong); display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); position:relative; transition:background .3s, border-color .3s;
+  }
+  .pos-chain-block.pending{border-style:solid; border-color:var(--gold); color:var(--gold); background:#fff;}
+  .pos-chain-block.finalized{border-style:solid; border-color:var(--good); background:var(--good); color:#fff;}
+  .pos-chain-block.flash{animation:posFinalizeFlash .6s ease;}
+
+  .pos-stage{position:relative;}
+  .pos-wheel-area{display:flex; justify-content:center; position:relative; margin-bottom:22px;}
+  .pos-wheel-pointer{position:absolute; top:-4px; left:50%; transform:translateX(-50%); font-size:16px; color:var(--bad); z-index:3;}
+  .pos-wheel-svg{width:210px; height:210px; display:block;}
+  #posWheelGroup{transition:transform 2.6s cubic-bezier(0.13,0.66,0.1,1); transform-origin:110px 110px;}
+  .pos-wheel-fade{transition:opacity .25s ease;}
+
+  .pos-validators{display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
+  .pos-card{
+    flex:1 1 145px; max-width:165px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:8px;
+    padding:12px; text-align:center; position:relative; transition:border-color .25s, box-shadow .25s, opacity .25s;
+  }
+  .pos-card.proposing{border-color:var(--gold); animation:posPulse 1s ease-in-out infinite;}
+  .pos-card.voted{box-shadow:0 0 0 2px rgba(47,93,107,0.3);}
+  .pos-card.slashed{opacity:.45;}
+  .pos-card.shaking{animation:posShake .4s ease;}
+  .pos-avatar{
+    width:36px; height:36px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:15px; color:#fff;
+  }
+  .pos-card h5{margin:0 0 8px; font-family:'Fraunces',serif; font-weight:600; font-size:14px;}
+  .pos-stake-track{height:10px; background:var(--paper-dim); border:1px solid var(--rule); border-radius:5px; overflow:hidden; margin-bottom:6px;}
+  .pos-stake-fill{height:100%; transition:width .6s ease, background-color .3s;}
+  .pos-stake-fill.draining{background:var(--bad) !important;}
+  .pos-stake-label{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); margin-bottom:8px;}
+  .pos-card-status{font-family:'IBM Plex Mono',monospace; font-size:9.5px; min-height:13px; color:var(--ink-soft); margin-bottom:7px;}
+  .pos-slash-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:3px 8px; border-radius:9px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--bad); cursor:pointer;
+  }
+  .pos-slash-btn:hover{background:var(--bad); color:#fff;}
+  .pos-slash-btn:disabled{opacity:.4; cursor:not-allowed;}
+  .pos-slash-stamp{position:absolute; top:6px; right:9px; font-size:13px;}
+
+  .pos-flying{position:absolute; z-index:5; pointer-events:none; font-size:16px; left:0; top:0; will-change:transform;}
+  .pos-flying.block-icon{font-size:18px;}
+  .pos-reward-float{
+    position:absolute; z-index:6; pointer-events:none; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; font-weight:600; color:var(--good); left:0; top:0; will-change:transform, opacity;
+  }
+  .pos-confetti{position:absolute; z-index:5; pointer-events:none; width:6px; height:6px; border-radius:50%; left:0; top:0; will-change:transform, opacity;}
+
+  @keyframes posPulse{
+    0%,100%{box-shadow:0 0 0 3px rgba(156,122,36,0.28);}
+    50%{box-shadow:0 0 0 8px rgba(156,122,36,0.04);}
+  }
+  @keyframes posShake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-6px);} 40%{transform:translateX(6px);}
+    60%{transform:translateX(-4px);} 80%{transform:translateX(4px);}
+  }
+  @keyframes posFinalizeFlash{
+    0%{box-shadow:0 0 0 0 rgba(47,93,69,0.5);}
+    100%{box-shadow:0 0 0 10px rgba(47,93,69,0);}
+  }
+
+  /* ---------- Proof of Work deep-dive (animated) ---------- */
+  .pow-toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+  .pow-round-counter{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin-left:auto;}
+  .pow-diff-control{display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);}
+  .pow-diff-btn{
+    width:24px; height:24px; border-radius:50%; border:1px solid var(--rule-strong); background:#fff;
+    color:var(--ink-soft); cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1;
+  }
+  .pow-diff-btn:disabled{opacity:.4; cursor:not-allowed;}
+  .pow-diff-dots{letter-spacing:2px; color:var(--gold);}
+  .pow-stat-line{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin-bottom:16px;
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:9px 14px;
+  }
+  .pow-stat-line b{color:var(--bad);}
+
+  .pow-chain-strip{
+    display:flex; gap:8px; align-items:center; overflow-x:auto; background:#fff;
+    border:1px solid var(--rule-strong); border-radius:6px; padding:10px; margin-bottom:20px; min-height:56px;
+  }
+  .pow-chain-placeholder{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); padding:0 8px; white-space:nowrap;}
+  .pow-chain-block{
+    flex:0 0 auto; width:54px; height:38px; border-radius:5px; background:var(--paper-dim);
+    border:1.6px dashed var(--rule-strong); display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); position:relative; transition:background .3s, border-color .3s;
+  }
+  .pow-chain-block.finalized{border-style:solid; border-color:var(--gold); background:var(--gold); color:#fff;}
+  .pow-chain-block.flash{animation:powFinalizeFlash .6s ease;}
+
+  .pow-stage{position:relative;}
+  .pow-miners{display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
+  .pow-card{
+    flex:1 1 165px; max-width:190px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:8px;
+    padding:12px; text-align:center; position:relative; transition:border-color .25s, opacity .25s;
+  }
+  .pow-card.winner{border-color:var(--gold); animation:posPulse 1s ease-in-out infinite;}
+  .pow-card.discarded{opacity:.4;}
+  .pow-avatar{
+    width:36px; height:36px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:15px; color:#fff;
+  }
+  .pow-card h5{margin:0 0 4px; font-family:'Fraunces',serif; font-weight:600; font-size:14px;}
+  .pow-hashpower{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-bottom:8px;}
+  .pow-hash-line{
+    font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); background:var(--paper-dim);
+    border:1px solid var(--rule); border-radius:4px; padding:4px 6px; margin-bottom:6px; min-height:16px; word-break:break-all;
+  }
+  .pow-nonce-line{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--ink-soft); margin-bottom:6px;}
+  .pow-bar-track{height:10px; background:var(--paper-dim); border:1px solid var(--rule); border-radius:5px; overflow:hidden; margin-bottom:7px;}
+  .pow-bar-fill{height:100%; transition:width .1s linear;}
+  .pow-card-status{font-family:'IBM Plex Mono',monospace; font-size:9.5px; min-height:13px; color:var(--ink-soft);}
+
+  .pow-flying{position:absolute; z-index:5; pointer-events:none; font-size:16px; left:0; top:0; will-change:transform;}
+  .pow-flying.block-icon{font-size:18px;}
+  .pow-reward-float{
+    position:absolute; z-index:6; pointer-events:none; font-family:'IBM Plex Mono',monospace;
+    font-size:12px; font-weight:600; color:var(--gold); left:0; top:0; will-change:transform, opacity;
+  }
+  .pow-confetti{position:absolute; z-index:5; pointer-events:none; width:6px; height:6px; border-radius:50%; left:0; top:0; will-change:transform, opacity;}
+
+  @keyframes powFinalizeFlash{
+    0%{box-shadow:0 0 0 0 rgba(156,122,36,0.5);}
+    100%{box-shadow:0 0 0 10px rgba(156,122,36,0);}
+  }
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Core Blockchain Mechanics — Topic 07 of 40</p>
+  <h1>Consensus Mechanisms <em>(PoW, PoS, BFT…)</em></h1>
+  <p>How a network of strangers who don't trust each other still agree on a single version of the truth — and what it costs to lie.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>Agreement, without a referee</h2>
+    <p>A consensus mechanism is the rule a decentralized network uses to agree on the next valid block — without any central party deciding for everyone. It's the practical answer to the classic <strong>Byzantine Generals Problem</strong>: how do mutually distrustful parties, talking over an unreliable network, still coordinate on one shared decision, even if some of them are lying?</p>
+    <p>Every mechanism answers that question the same general way: make lying expensive, and make honesty the cheapest path to a reward.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Three different bets</p>
+    <h2>What gets put at risk to keep you honest</h2>
+    <div class="bet-grid">
+      <div class="box"><h4>Proof of Work</h4><p>Bets real-world computation. Lying means you've wasted electricity racing against everyone else for nothing.</p></div>
+      <div class="box"><h4>Proof of Stake</h4><p>Bets real-world money. Lying means your locked-up stake gets destroyed — "slashed."</p></div>
+      <div class="box"><h4>BFT voting</h4><p>Bets reputation and explicit votes among known validators. Enough honest votes, and the network finalizes instantly.</p></div>
+    </div>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro" id="diagramIntro">Try it: run a round and watch how this mechanism actually picks who proposes the next block.</p>
+
+    <div class="mode-row">
+      <button class="chip active" data-mode="POW">Proof of Work</button>
+      <button class="chip" data-mode="POS">Proof of Stake</button>
+      <button class="chip" data-mode="BFT">BFT Voting</button>
+    </div>
+
+    <div class="node-stage" id="nodeStage"></div>
+
+    <div class="stage-controls">
+      <button class="run-btn" id="runBtn">⛏ Start mining race</button>
+      <button class="reset-btn" id="resetBtn">↺ Reset this mode</button>
+    </div>
+    <div class="tally-line" id="tallyLine"></div>
+
+    <div class="consensus-log" id="consensusLog"></div>
+  </div>
+
+  <div class="note-box">
+    Real networks rarely run just one of these in its purest form. <strong>Delegated PoS</strong> adds an election layer on top of staking. <strong>Proof of Authority</strong> skips the economic bet entirely and trusts known identities. <strong>Avalanche</strong> and <strong>DAG-based</strong> designs reach agreement through repeated gossip instead of a single vote or race. They're all still answering the same question this diagram is asking: who gets to propose next, and how does everyone else agree they were right to?
+  </div>
+
+  <div class="section">
+    <p class="kicker">A closer look</p>
+    <h2>Proof of Work, end to end</h2>
+    <p>The simulator above shows the race as a single progress bar. What's actually happening is messier: every miner is hashing their candidate block with a different random number (a <strong>nonce</strong>) over and over, checking each result against a target, and throwing away every attempt that doesn't qualify. Watch the whole grind below — including exactly how much of it goes to waste.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Run a round to watch five miners hash in real time. Raise the difficulty to see how much longer — and how much more wasted work — a harder target costs.</p>
+
+    <div class="pow-toolbar">
+      <button class="run-btn" id="powRunBtn">⛏ Start mining round</button>
+      <button class="reset-btn" id="powAutoBtn">🔁 Auto-run</button>
+      <button class="reset-btn" id="powResetBtn">↺ Reset</button>
+      <div class="pow-diff-control">
+        Difficulty:
+        <button class="pow-diff-btn" id="powDiffDown">−</button>
+        <span class="pow-diff-dots" id="powDiffDots">●●○○</span>
+        <button class="pow-diff-btn" id="powDiffUp">+</button>
+        <span id="powDiffLabel">(target: 00…)</span>
+      </div>
+      <span class="pow-round-counter" id="powRoundCounter">Round 0</span>
+    </div>
+
+    <div class="pow-stat-line">⚡ Total attempts wasted by losing miners so far: <b id="powWastedTotal">0</b></div>
+
+    <div class="pow-chain-strip" id="powChainStrip">
+      <span class="pow-chain-placeholder">Chain →</span>
+    </div>
+
+    <div class="pow-stage" id="powStage">
+      <div class="pow-miners" id="powMiners"></div>
+    </div>
+
+    <div class="consensus-log" id="powLog"></div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">A closer look</p>
+    <h2>Proof of Stake, end to end</h2>
+    <p>The simulator above shows the selection moment in isolation. A real epoch is a small pipeline: validators stake coins, one gets picked in proportion to that stake, the network attests, the block finalizes, and the proposer gets paid — or, if someone cheats, slashed instead. Watch the whole cycle below.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro" id="posIntro">Spin the wheel to pick a proposer weighted by stake, watch the block get proposed and attested, then finalized with a reward. Slash a validator at any time to see it removed from future spins.</p>
+
+    <div class="pos-toolbar">
+      <button class="run-btn" id="posRunBtn">▶ Run epoch</button>
+      <button class="reset-btn" id="posAutoBtn">🔁 Auto-run</button>
+      <button class="reset-btn" id="posResetBtn">↺ Reset</button>
+      <span class="pos-epoch-counter" id="posEpochCounter">Epoch 0</span>
+    </div>
+
+    <div class="pos-chain-strip" id="posChainStrip">
+      <span class="pos-chain-placeholder">Chain →</span>
+    </div>
+
+    <div class="pos-stage" id="posStage">
+      <div class="pos-wheel-area">
+        <div class="pos-wheel-pointer">▼</div>
+        <svg class="pos-wheel-svg" id="posWheelSvg" viewBox="0 0 220 220">
+          <g id="posWheelGroup"></g>
+        </svg>
+      </div>
+      <div class="pos-validators" id="posValidators"></div>
+    </div>
+
+    <div class="consensus-log" id="posLog"></div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>Same problem, different chains</h2>
+    <ul class="uses-list">
+      <li><strong>Bitcoin</strong> runs Proof of Work — exactly the mining race simulated above, just with real hardware and a much bigger network.</li>
+      <li><strong>Ethereum, Cardano</strong> run Proof of Stake — validators are chosen in proportion to stake, and equivocating gets that stake slashed.</li>
+      <li><strong>Hyperledger Fabric, Cosmos's Tendermint</strong> run BFT-style voting among a known validator set, finalizing instantly rather than racing.</li>
+      <li>This is exactly why PoW and PoS chains use the fork-choice rule from the last topic — the winner isn't <em>known</em> for certain until enough blocks pile up. BFT chains skip that uncertainty entirely: once two-thirds vote yes, there's no fork to resolve, because there's nothing left to disagree about.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">The simple simulator above runs entirely in your browser with simplified pacing. The Proof of Work deep-dive uses real SHA-256 (Web Crypto API) for every flickering hash you see — the race timing itself is paced for clarity rather than running literal brute-force search. Hashpower, stakes, and vote outcomes are simplified — real networks involve far more nodes and far messier networking conditions.</p>
+</div>
+
+<script>
+(function(){
+  const NODE_COUNT = 5;
+  const POW_WEIGHTS = [10, 30, 15, 25, 20]; // % hashpower
+  const POS_STAKES_INITIAL = [400, 250, 150, 150, 50]; // coins
+  let runToken = 0; // incremented on mode switch / reset to invalidate stale timers
+
+  const state = {
+    mode: 'POW',
+    pow: { progress: [0,0,0,0,0], racing: false, winner: null, timer: null },
+    pos: { stakes: POS_STAKES_INITIAL.slice(), slashed: [false,false,false,false,false], spinning: false, winner: null },
+    bft: { byzantine: [false,false,false,false,false], voting: false, votes: [null,null,null,null,null], result: null }
+  };
+
+  const els = {
+    stage: document.getElementById('nodeStage'),
+    runBtn: document.getElementById('runBtn'),
+    resetBtn: document.getElementById('resetBtn'),
+    tally: document.getElementById('tallyLine'),
+    log: document.getElementById('consensusLog'),
+    intro: document.getElementById('diagramIntro'),
+    chips: document.querySelectorAll('.chip')
+  };
+
+  const INTROS = {
+    POW: 'Try it: start the mining race. Each node\u2019s hashpower changes its odds, but never guarantees the win.',
+    POS: 'Try it: select the next validator. Bigger stakes mean better odds \u2014 then try slashing a node and watch its odds disappear.',
+    BFT: 'Try it: mark one or two nodes as byzantine, then propose \u0026 vote. See how many faulty nodes the network can actually tolerate.'
+  };
+  const RUN_LABELS = { POW: '\u26cf Start mining race', POS: '\ud83c\udfb2 Select next validator', BFT: '\ud83d\uddf3 Propose \u0026 vote' };
+
+  function log(msg){
+    const p = document.createElement('p');
+    p.textContent = msg;
+    els.log.appendChild(p);
+    while(els.log.children.length > 40) els.log.removeChild(els.log.firstChild);
+    els.log.scrollTop = els.log.scrollHeight;
+  }
+
+  const MODE_LABELS = { POW: 'PoW', POS: 'PoS', BFT: 'BFT' };
+
+  function setMode(mode){
+    runToken++;
+    clearInterval(state.pow.timer);
+    state.pow.racing = false;
+    state.pos.spinning = false;
+    state.bft.voting = false;
+    state.mode = mode;
+    els.chips.forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+    els.intro.textContent = INTROS[mode];
+    els.runBtn.textContent = RUN_LABELS[mode];
+    els.runBtn.disabled = false;
+    els.tally.textContent = '';
+    render();
+  }
+
+  function render(){
+    let html = '';
+    for(let i = 0; i < NODE_COUNT; i++){
+      if(state.mode === 'POW'){
+        const p = state.pow.progress[i];
+        const isWinner = state.pow.winner === i;
+        const discarded = state.pow.winner !== null && !isWinner;
+        html += `
+          <div class="node-box${isWinner?' winner':''}${discarded?' discarded':''}">
+            <h5>Node ${i+1}</h5>
+            <div class="meta">hashpower: ${POW_WEIGHTS[i]}%</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div>
+            <div class="status-line">${isWinner ? '\u2705 found the block!' : (discarded ? 'work discarded' : (state.pow.racing ? '\u26cf mining\u2026' : '\u2014'))}</div>
+          </div>`;
+      } else if(state.mode === 'POS'){
+        const total = state.pos.stakes.reduce((a,b)=>a+b,0) || 1;
+        const pct = Math.round(state.pos.stakes[i] / total * 100);
+        const isWinner = state.pos.winner === i;
+        const isSlashed = state.pos.slashed[i];
+        html += `
+          <div class="node-box${isWinner?' winner':''}${isSlashed?' slashed':''}">
+            <h5>Node ${i+1}</h5>
+            <div class="meta">stake: ${state.pos.stakes[i]} (${isSlashed ? 0 : pct}%)</div>
+            <div class="bar-track"><div class="bar-fill stake-fill" style="width:${isSlashed ? 0 : pct}%"></div></div>
+            <div class="status-line">${isSlashed ? '\u26d4 slashed' : (isWinner ? '\u2705 proposes block' : '\u2014')}</div>
+            <button class="toggle-byz${isSlashed?' is-byz':''}" data-idx="${i}" data-action="slash" ${isSlashed?'disabled':''}>${isSlashed ? 'slashed' : '\u26a1 slash this node'}</button>
+          </div>`;
+      } else { // BFT
+        const isByz = state.bft.byzantine[i];
+        const vote = state.bft.votes[i];
+        let voteText = '\u2014';
+        if(vote === 'yes') voteText = '\u2705 voted yes';
+        else if(vote === 'no') voteText = '\u2716 no vote';
+        html += `
+          <div class="node-box">
+            <h5>Node ${i+1}</h5>
+            <div class="meta">${isByz ? 'byzantine' : 'honest'}</div>
+            <div class="status-line">${voteText}</div>
+            <button class="toggle-byz${isByz?' is-byz':''}" data-idx="${i}" data-action="toggle-byz" ${state.bft.voting?'disabled':''}>${isByz ? '\ud83d\udd34 Byzantine' : '\ud83d\udfe2 Honest'}</button>
+          </div>`;
+      }
+    }
+    els.stage.innerHTML = html;
+
+    els.stage.querySelectorAll('[data-action="slash"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        state.pos.stakes[idx] = 0;
+        state.pos.slashed[idx] = true;
+        if(state.pos.winner === idx) state.pos.winner = null;
+        log(`[PoS] Node ${idx+1} equivocated and was slashed \u2014 stake reduced to 0.`);
+        render();
+      });
+    });
+    els.stage.querySelectorAll('[data-action="toggle-byz"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        state.bft.byzantine[idx] = !state.bft.byzantine[idx];
+        render();
+      });
+    });
+  }
+
+  function runPow(){
+    if(state.pow.racing) return;
+    runToken++;
+    const myToken = runToken;
+    state.pow.progress = [0,0,0,0,0];
+    state.pow.winner = null;
+    state.pow.racing = true;
+    els.runBtn.disabled = true;
+    els.tally.textContent = '';
+    log('[PoW] Mining race started.');
+    render();
+
+    state.pow.timer = setInterval(() => {
+      if(myToken !== runToken){ clearInterval(state.pow.timer); return; }
+      for(let i = 0; i < NODE_COUNT; i++){
+        if(state.pow.winner !== null) continue;
+        const jitter = 0.5 + Math.random() * 1.0;
+        state.pow.progress[i] = Math.min(100, state.pow.progress[i] + (POW_WEIGHTS[i] / 10) * jitter);
+      }
+      const winnerIdx = state.pow.progress.findIndex(p => p >= 100);
+      if(winnerIdx !== -1 && state.pow.winner === null){
+        state.pow.winner = winnerIdx;
+        state.pow.racing = false;
+        clearInterval(state.pow.timer);
+        els.runBtn.disabled = false;
+        log(`[PoW] Node ${winnerIdx+1} found the block first (hashpower ${POW_WEIGHTS[winnerIdx]}%). Everyone else's work is discarded.`);
+      }
+      render();
+    }, 60);
+  }
+
+  function runPos(){
+    if(state.pos.spinning) return;
+    const total = state.pos.stakes.reduce((a,b)=>a+b,0);
+    if(total <= 0){ log('[PoS] No stake left in the network \u2014 reset to try again.'); return; }
+
+    runToken++;
+    const myToken = runToken;
+
+    let r = Math.random() * total;
+    let winnerIdx = 0;
+    for(let i = 0; i < NODE_COUNT; i++){
+      if(r < state.pos.stakes[i]){ winnerIdx = i; break; }
+      r -= state.pos.stakes[i];
+      winnerIdx = i;
+    }
+
+    state.pos.spinning = true;
+    state.pos.winner = null;
+    els.runBtn.disabled = true;
+    let step = 0;
+    const cycle = [0,1,2,3,4,0,1,2,3,4,0,1,2,3].filter(i => !state.pos.slashed[i]);
+    const sequence = cycle.concat(Array(4).fill(winnerIdx));
+
+    function tick(){
+      if(myToken !== runToken) return; // a mode switch or reset happened — abandon this run
+      if(step >= sequence.length){
+        state.pos.winner = winnerIdx;
+        state.pos.spinning = false;
+        els.runBtn.disabled = false;
+        const total2 = state.pos.stakes.reduce((a,b)=>a+b,0) || 1;
+        const pct = Math.round(state.pos.stakes[winnerIdx] / total2 * 100);
+        log(`[PoS] Node ${winnerIdx+1} selected to propose the block (had a ${pct}% chance).`);
+        render();
+        return;
+      }
+      state.pos.winner = sequence[step];
+      render();
+      step++;
+      setTimeout(tick, 50 + step * 12);
+    }
+    tick();
+  }
+
+  function runBft(){
+    if(state.bft.voting) return;
+    runToken++;
+    const myToken = runToken;
+    state.bft.voting = true;
+    state.bft.votes = [null,null,null,null,null];
+    els.runBtn.disabled = true;
+    render();
+
+    const proposerIdx = state.bft.byzantine.findIndex(b => !b);
+    log(`[BFT] Node ${proposerIdx === -1 ? 1 : proposerIdx + 1} proposes the next block.`);
+
+    let i = 0;
+    function revealNext(){
+      if(myToken !== runToken) return; // a mode switch or reset happened — abandon this run
+      if(i >= NODE_COUNT){
+        const honestVotes = state.bft.votes.filter(v => v === 'yes').length;
+        const needed = Math.ceil((2 * NODE_COUNT) / 3);
+        els.tally.textContent = `Votes: ${honestVotes} of ${NODE_COUNT} needed \u2265 ${needed} to finalize.`;
+        if(honestVotes >= needed){
+          log(`[BFT] \u2705 Finalized \u2014 ${honestVotes}/${NODE_COUNT} votes reached the two-thirds threshold.`);
+        } else {
+          log(`[BFT] \u274c No finality \u2014 only ${honestVotes}/${NODE_COUNT} honest votes, short of the ${needed} needed.`);
+        }
+        state.bft.voting = false;
+        els.runBtn.disabled = false;
+        return;
+      }
+      state.bft.votes[i] = state.bft.byzantine[i] ? (Math.random() < 0.5 ? 'no' : null) : 'yes';
+      render();
+      i++;
+      setTimeout(revealNext, 140);
+    }
+    revealNext();
+  }
+
+  els.runBtn.addEventListener('click', () => {
+    if(state.mode === 'POW') runPow();
+    else if(state.mode === 'POS') runPos();
+    else runBft();
+  });
+
+  els.resetBtn.addEventListener('click', () => {
+    runToken++;
+    clearInterval(state.pow.timer);
+    if(state.mode === 'POW'){
+      state.pow = { progress: [0,0,0,0,0], racing: false, winner: null, timer: null };
+    } else if(state.mode === 'POS'){
+      state.pos = { stakes: POS_STAKES_INITIAL.slice(), slashed: [false,false,false,false,false], spinning: false, winner: null };
+    } else {
+      state.bft = { byzantine: [false,false,false,false,false], voting: false, votes: [null,null,null,null,null], result: null };
+    }
+    els.runBtn.disabled = false;
+    els.tally.textContent = '';
+    log(`[${MODE_LABELS[state.mode]}] Reset.`);
+    render();
+  });
+
+  els.chips.forEach(chip => {
+    chip.addEventListener('click', () => setMode(chip.dataset.mode));
+  });
+
+  log('Simulation ready. Choose a mechanism above and run a round.');
+  render();
+})();
+</script>
+
+<script>
+(function(){
+  const POS_COLORS = ['#9C7A24','#2F5D6B','#9C5E1F','#6B4C7A','#3F6B3F'];
+  const NAMES = ['Validator A','Validator B','Validator C','Validator D','Validator E'];
+  const INITIAL_STAKES = [320, 240, 180, 140, 120];
+  const REWARD = 20;
+  const AUTO_GAP_MS = 1900;
+
+  let validators = INITIAL_STAKES.map((s,i) => ({ id:i, name:NAMES[i], color:POS_COLORS[i], stake:s, slashed:false }));
+  let epoch = 0;
+  let running = false;
+  let autoOn = false;
+  let runToken = 0;
+  let accumRotation = 0;
+
+  const els = {
+    runBtn: document.getElementById('posRunBtn'),
+    autoBtn: document.getElementById('posAutoBtn'),
+    resetBtn: document.getElementById('posResetBtn'),
+    epochCounter: document.getElementById('posEpochCounter'),
+    chainStrip: document.getElementById('posChainStrip'),
+    stage: document.getElementById('posStage'),
+    wheelGroup: document.getElementById('posWheelGroup'),
+    validatorsEl: document.getElementById('posValidators'),
+    log: document.getElementById('posLog'),
+  };
+
+  function log(msg){
+    const p = document.createElement('p');
+    p.textContent = msg;
+    els.log.appendChild(p);
+    while(els.log.children.length > 40) els.log.removeChild(els.log.firstChild);
+    els.log.scrollTop = els.log.scrollHeight;
+  }
+
+  function activeValidators(){ return validators.filter(v => !v.slashed); }
+
+  function polarToCartesian(cx, cy, r, angleDeg){
+    const a = (angleDeg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+  function describeArc(cx, cy, r, startAngle, endAngle){
+    const p1 = polarToCartesian(cx, cy, r, endAngle);
+    const p2 = polarToCartesian(cx, cy, r, startAngle);
+    const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+    return `M ${cx} ${cy} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} Z`;
+  }
+
+  function renderWheel(){
+    const active = activeValidators();
+    const total = active.reduce((a,v) => a + v.stake, 0);
+    let html = '';
+    if(active.length === 1 || total <= 0){
+      const only = active[0];
+      if(only){
+        html = `<circle cx="110" cy="110" r="95" fill="${only.color}"></circle>`;
+      }
+    } else {
+      let angle = 0;
+      active.forEach(v => {
+        const sweep = (v.stake / total) * 360;
+        if(sweep > 0.0001){
+          const d = describeArc(110, 110, 95, angle, angle + sweep);
+          html += `<path d="${d}" fill="${v.color}"></path>`;
+        }
+        angle += sweep;
+      });
+    }
+    html += `<circle cx="110" cy="110" r="34" fill="var(--paper-dim)" stroke="var(--rule-strong)" stroke-width="1.5"></circle>`;
+    els.wheelGroup.innerHTML = html;
+  }
+
+  function sliceCenterAngle(targetId){
+    const active = activeValidators();
+    const total = active.reduce((a,v) => a + v.stake, 0);
+    let angle = 0;
+    for(const v of active){
+      const sweep = (v.stake / total) * 360;
+      if(v.id === targetId) return angle + sweep / 2;
+      angle += sweep;
+    }
+    return 0;
+  }
+
+  function renderValidators(){
+    els.validatorsEl.innerHTML = validators.map(v => {
+      const pct = v.slashed ? 0 : Math.round(v.stake / activeValidators().reduce((a,x)=>a+x.stake,0.0001) * 100);
+      return `
+        <div class="pos-card${v.slashed?' slashed':''}" id="posCard${v.id}" data-id="${v.id}">
+          ${v.slashed ? '<span class="pos-slash-stamp">⛔</span>' : ''}
+          <div class="pos-avatar" style="background:${v.color}">${v.name[v.name.length-1]}</div>
+          <h5>${v.name}</h5>
+          <div class="pos-stake-track"><div class="pos-stake-fill" id="posFill${v.id}" style="width:${v.slashed?0:pct}%; background:${v.color}"></div></div>
+          <div class="pos-stake-label">${v.slashed ? 'slashed — 0 staked' : v.stake + ' staked (' + pct + '%)'}</div>
+          <div class="pos-card-status" id="posStatus${v.id}">—</div>
+          <button class="pos-slash-btn" data-id="${v.id}" ${v.slashed?'disabled':''}>${v.slashed?'slashed':'⚡ slash'}</button>
+        </div>`;
+    }).join('');
+
+    els.validatorsEl.querySelectorAll('.pos-slash-btn').forEach(btn => {
+      btn.addEventListener('click', () => slashValidator(parseInt(btn.dataset.id,10)));
+    });
+  }
+
+  function rectRelativeToStage(el){
+    const r = el.getBoundingClientRect();
+    const s = els.stage.getBoundingClientRect();
+    return { cx: r.left - s.left + r.width/2, cy: r.top - s.top + r.height/2 };
+  }
+
+  function flyEmoji(fromRect, toRect, content, extraClass, durationMs){
+    return new Promise(resolve => {
+      const el = document.createElement('div');
+      el.className = 'pos-flying' + (extraClass ? ' ' + extraClass : '');
+      el.textContent = content;
+      el.style.left = fromRect.cx + 'px';
+      el.style.top = fromRect.cy + 'px';
+      el.style.transform = 'translate(-50%,-50%)';
+      els.stage.appendChild(el);
+      const dx = toRect.cx - fromRect.cx;
+      const dy = toRect.cy - fromRect.cy;
+      const anim = el.animate(
+        [
+          { transform: 'translate(-50%,-50%) scale(1)' },
+          { transform: `translate(calc(-50% + ${dx*0.5}px), calc(-50% + ${dy*0.5 - 28}px)) scale(1.15)`, offset: 0.5 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.9)` }
+        ],
+        { duration: durationMs || 650, easing: 'ease-in-out' }
+      );
+      anim.onfinish = () => { el.remove(); resolve(); };
+    });
+  }
+
+  function rewardFloat(aboveRect, text){
+    const el = document.createElement('div');
+    el.className = 'pos-reward-float';
+    el.textContent = text;
+    el.style.left = aboveRect.cx + 'px';
+    el.style.top = aboveRect.cy + 'px';
+    el.style.transform = 'translate(-50%,-50%)';
+    el.style.opacity = '1';
+    els.stage.appendChild(el);
+    const anim = el.animate(
+      [
+        { transform: 'translate(-50%,-50%) translateY(0px)', opacity: 1 },
+        { transform: 'translate(-50%,-50%) translateY(-34px)', opacity: 0 }
+      ],
+      { duration: 900, easing: 'ease-out' }
+    );
+    anim.onfinish = () => el.remove();
+  }
+
+  function confettiBurst(centerRect){
+    for(let i = 0; i < 7; i++){
+      const el = document.createElement('div');
+      el.className = 'pos-confetti';
+      el.style.left = centerRect.cx + 'px';
+      el.style.top = centerRect.cy + 'px';
+      el.style.background = POS_COLORS[i % POS_COLORS.length];
+      els.stage.appendChild(el);
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 26 + Math.random() * 30;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const anim = el.animate(
+        [
+          { transform: 'translate(-50%,-50%) translate(0,0)', opacity: 1 },
+          { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px)`, opacity: 0 }
+        ],
+        { duration: 550 + Math.random()*200, easing: 'ease-out' }
+      );
+      anim.onfinish = () => el.remove();
+    }
+  }
+
+  function spinWheelTo(winnerId){
+    return new Promise(resolve => {
+      const centerAngle = sliceCenterAngle(winnerId);
+      const currentMod = ((accumRotation % 360) + 360) % 360;
+      const desiredMod = (360 - centerAngle) % 360;
+      let delta = (desiredMod - currentMod + 360) % 360;
+      if(delta < 90) delta += 360;
+      const extraSpins = 3 + Math.floor(Math.random() * 2); // 3-4 extra full spins
+      accumRotation += extraSpins * 360 + delta;
+      els.wheelGroup.style.transform = `rotate(${accumRotation}deg)`;
+      setTimeout(resolve, 2650);
+    });
+  }
+
+  function pickWinner(){
+    const active = activeValidators();
+    const total = active.reduce((a,v) => a + v.stake, 0);
+    let r = Math.random() * total;
+    for(const v of active){
+      if(r < v.stake) return v.id;
+      r -= v.stake;
+    }
+    return active[active.length - 1].id;
+  }
+
+  function addIncomingSlot(){
+    const slot = document.createElement('div');
+    slot.className = 'pos-chain-block';
+    slot.id = 'posIncomingSlot';
+    slot.textContent = '+';
+    els.chainStrip.appendChild(slot);
+    return slot;
+  }
+  let incomingSlot = addIncomingSlot();
+
+  async function runEpoch(){
+    if(running) return;
+    const active = activeValidators();
+    if(active.length < 2){
+      log('⚠ Fewer than 2 active validators left — stopping. (In a real network, consensus would already have stalled.)');
+      autoOn = false;
+      els.autoBtn.textContent = '🔁 Auto-run';
+      return;
+    }
+
+    runToken++;
+    const myToken = runToken;
+    running = true;
+    els.runBtn.disabled = true;
+
+    const winnerId = pickWinner();
+    const winner = validators.find(v => v.id === winnerId);
+    log(`Epoch ${epoch+1}: spinning — weighted by current stake…`);
+
+    await spinWheelTo(winnerId);
+    if(myToken !== runToken) { running = false; return; }
+
+    const card = document.getElementById('posCard' + winnerId);
+    card.classList.add('proposing');
+    document.getElementById('posStatus' + winnerId).textContent = '✍ proposing block…';
+
+    const fromRect = rectRelativeToStage(card);
+    const toRect = rectRelativeToStage(incomingSlot);
+    await flyEmoji(fromRect, toRect, '▦', 'block-icon', 700);
+    if(myToken !== runToken) { running = false; return; }
+
+    incomingSlot.classList.add('pending');
+    incomingSlot.textContent = '#' + (epoch+1);
+    document.getElementById('posStatus' + winnerId).textContent = `✅ proposed block #${epoch+1}`;
+
+    let tally = 1; // proposer's own implicit attestation
+    const others = active.filter(v => v.id !== winnerId);
+
+    for(const v of others){
+      if(myToken !== runToken) { running = false; return; }
+      await new Promise(r => setTimeout(r, 260));
+      const vCard = document.getElementById('posCard' + v.id);
+      const vFrom = rectRelativeToStage(vCard);
+      const vTo = rectRelativeToStage(incomingSlot);
+      vCard.classList.add('voted');
+      flyEmoji(vFrom, vTo, '✓', '', 500);
+      tally++;
+      document.getElementById('posStatus' + v.id).textContent = '✓ attested';
+    }
+
+    await new Promise(r => setTimeout(r, 350));
+    if(myToken !== runToken) { running = false; return; }
+
+    incomingSlot.classList.remove('pending');
+    incomingSlot.classList.add('finalized', 'flash');
+    const finalRect = rectRelativeToStage(incomingSlot);
+    confettiBurst(finalRect);
+
+    winner.stake += REWARD;
+    rewardFloat(rectRelativeToStage(card), '+' + REWARD);
+    document.getElementById('posStatus' + winnerId).textContent = `🏅 finalized, +${REWARD} reward`;
+
+    log(`Epoch ${epoch+1}: ${winner.name} proposed block #${epoch+1} — finalized with ${tally}/${active.length} attestations. +${REWARD} reward.`);
+
+    epoch++;
+    els.epochCounter.textContent = 'Epoch ' + epoch;
+    incomingSlot.id = '';
+    incomingSlot = addIncomingSlot();
+
+    renderValidators();
+    renderWheel();
+
+    setTimeout(() => {
+      document.querySelectorAll('.pos-card.proposing, .pos-card.voted').forEach(c => {
+        c.classList.remove('proposing','voted');
+      });
+    }, 200);
+
+    running = false;
+    els.runBtn.disabled = false;
+
+    if(autoOn && myToken === runToken){
+      setTimeout(() => { if(autoOn) runEpoch(); }, AUTO_GAP_MS);
+    }
+  }
+
+  function slashValidator(id){
+    if(running) return;
+    const v = validators.find(x => x.id === id);
+    if(!v || v.slashed) return;
+
+    const card = document.getElementById('posCard' + id);
+    const fill = document.getElementById('posFill' + id);
+    card.classList.add('shaking');
+    fill.classList.add('draining');
+    fill.style.width = '0%';
+    document.getElementById('posStatus' + id).textContent = '⚡ equivocating…';
+
+    setTimeout(() => {
+      v.slashed = true;
+      v.stake = 0;
+      log(`⚡ ${v.name} equivocated and was slashed — removed from future epochs.`);
+      renderValidators();
+      els.wheelGroup.style.opacity = '0';
+      setTimeout(() => {
+        renderWheel();
+        els.wheelGroup.style.opacity = '1';
+      }, 260);
+    }, 480);
+  }
+
+  els.runBtn.addEventListener('click', runEpoch);
+
+  els.autoBtn.addEventListener('click', () => {
+    autoOn = !autoOn;
+    els.autoBtn.textContent = autoOn ? '⏸ Stop auto-run' : '🔁 Auto-run';
+    els.autoBtn.style.background = autoOn ? 'var(--cover)' : '';
+    els.autoBtn.style.color = autoOn ? 'var(--paper)' : '';
+    if(autoOn && !running) runEpoch();
+  });
+
+  els.resetBtn.addEventListener('click', () => {
+    runToken++;
+    running = false;
+    autoOn = false;
+    epoch = 0;
+    accumRotation = 0;
+    els.autoBtn.textContent = '🔁 Auto-run';
+    els.autoBtn.style.background = '';
+    els.autoBtn.style.color = '';
+    els.runBtn.disabled = false;
+    els.epochCounter.textContent = 'Epoch 0';
+    validators = INITIAL_STAKES.map((s,i) => ({ id:i, name:NAMES[i], color:POS_COLORS[i], stake:s, slashed:false }));
+    els.wheelGroup.style.transition = 'none';
+    els.wheelGroup.style.transform = 'rotate(0deg)';
+    requestAnimationFrame(() => { els.wheelGroup.style.transition = ''; });
+    els.chainStrip.innerHTML = '<span class="pos-chain-placeholder">Chain →</span>';
+    incomingSlot = addIncomingSlot();
+    els.log.innerHTML = '';
+    log('Reset. Stakes restored, all validators active.');
+    renderValidators();
+    renderWheel();
+  });
+
+  renderValidators();
+  renderWheel();
+  log('Ready. Click "Run epoch" to spin the wheel, or "Auto-run" to watch it loop.');
+})();
+</script>
+
+<script>
+(function(){
+  const POW_COLORS = ['#9C7A24','#2F5D6B','#9C5E1F','#6B4C7A','#3F6B3F'];
+  const MINER_NAMES = ['Miner 1','Miner 2','Miner 3','Miner 4','Miner 5'];
+  const HASHPOWER = [10, 30, 15, 25, 20];
+  const DIFF_DIVISOR = [1, 2.4, 4.6, 8]; // higher difficulty = slower bar fill
+  const DIFF_DOTS = ['●○○○','●●○○','●●●○','●●●●'];
+  const DIFF_TARGET = ['0…','00…','000…','0000…'];
+  const REWARD = '6.25';
+
+  let miners = HASHPOWER.map((hp,i) => ({ id:i, name:MINER_NAMES[i], color:POW_COLORS[i], hashpower:hp, nonce:0, bar:0 }));
+  let difficulty = 2;
+  let round = 0;
+  let wastedTotal = 0;
+  let running = false;
+  let autoOn = false;
+  let runToken = 0;
+
+  const els = {
+    runBtn: document.getElementById('powRunBtn'),
+    autoBtn: document.getElementById('powAutoBtn'),
+    resetBtn: document.getElementById('powResetBtn'),
+    diffDown: document.getElementById('powDiffDown'),
+    diffUp: document.getElementById('powDiffUp'),
+    diffDots: document.getElementById('powDiffDots'),
+    diffLabel: document.getElementById('powDiffLabel'),
+    roundCounter: document.getElementById('powRoundCounter'),
+    wastedTotalEl: document.getElementById('powWastedTotal'),
+    chainStrip: document.getElementById('powChainStrip'),
+    stage: document.getElementById('powStage'),
+    minersEl: document.getElementById('powMiners'),
+    log: document.getElementById('powLog'),
+  };
+
+  function log(msg){
+    const p = document.createElement('p');
+    p.textContent = msg;
+    els.log.appendChild(p);
+    while(els.log.children.length > 40) els.log.removeChild(els.log.firstChild);
+    els.log.scrollTop = els.log.scrollHeight;
+  }
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function updateDiffDisplay(){
+    els.diffDots.textContent = DIFF_DOTS[difficulty-1];
+    els.diffLabel.textContent = `(target: ${DIFF_TARGET[difficulty-1]})`;
+  }
+
+  function renderMiners(winnerId, discardedIds){
+    els.minersEl.innerHTML = miners.map(m => {
+      const isWinner = winnerId === m.id;
+      const isDiscarded = discardedIds && discardedIds.includes(m.id);
+      let statusText = '⛏ hashing…';
+      if(isWinner) statusText = `✅ found it! nonce ${m.nonce.toLocaleString()}`;
+      else if(isDiscarded) statusText = `✗ discarded — ${m.nonce.toLocaleString()} attempts wasted`;
+      else if(!running) statusText = '—';
+      return `
+        <div class="pow-card${isWinner?' winner':''}${isDiscarded?' discarded':''}" id="powCard${m.id}">
+          <div class="pow-avatar" style="background:${m.color}">${m.id+1}</div>
+          <h5>${m.name}</h5>
+          <div class="pow-hashpower">hashpower: ${m.hashpower}%</div>
+          <div class="pow-hash-line" id="powHash${m.id}">…</div>
+          <div class="pow-nonce-line" id="powNonce${m.id}">nonce: ${m.nonce.toLocaleString()}</div>
+          <div class="pow-bar-track"><div class="pow-bar-fill" id="powBar${m.id}" style="width:${m.bar}%; background:${m.color}"></div></div>
+          <div class="pow-card-status" id="powStatus${m.id}">${statusText}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function rectRelativeToStage(el){
+    const r = el.getBoundingClientRect();
+    const s = els.stage.getBoundingClientRect();
+    return { cx: r.left - s.left + r.width/2, cy: r.top - s.top + r.height/2 };
+  }
+
+  function flyEmoji(fromRect, toRect, content, extraClass, durationMs){
+    return new Promise(resolve => {
+      const el = document.createElement('div');
+      el.className = 'pow-flying' + (extraClass ? ' ' + extraClass : '');
+      el.textContent = content;
+      el.style.left = fromRect.cx + 'px';
+      el.style.top = fromRect.cy + 'px';
+      el.style.transform = 'translate(-50%,-50%)';
+      els.stage.appendChild(el);
+      const dx = toRect.cx - fromRect.cx;
+      const dy = toRect.cy - fromRect.cy;
+      const anim = el.animate(
+        [
+          { transform: 'translate(-50%,-50%) scale(1)' },
+          { transform: `translate(calc(-50% + ${dx*0.5}px), calc(-50% + ${dy*0.5 - 28}px)) scale(1.15)`, offset: 0.5 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.9)` }
+        ],
+        { duration: durationMs || 650, easing: 'ease-in-out' }
+      );
+      anim.onfinish = () => { el.remove(); resolve(); };
+    });
+  }
+
+  function rewardFloat(aboveRect, text){
+    const el = document.createElement('div');
+    el.className = 'pow-reward-float';
+    el.textContent = text;
+    el.style.left = aboveRect.cx + 'px';
+    el.style.top = aboveRect.cy + 'px';
+    el.style.transform = 'translate(-50%,-50%)';
+    els.stage.appendChild(el);
+    const anim = el.animate(
+      [
+        { transform: 'translate(-50%,-50%) translateY(0px)', opacity: 1 },
+        { transform: 'translate(-50%,-50%) translateY(-34px)', opacity: 0 }
+      ],
+      { duration: 900, easing: 'ease-out' }
+    );
+    anim.onfinish = () => el.remove();
+  }
+
+  function confettiBurst(centerRect){
+    for(let i = 0; i < 7; i++){
+      const el = document.createElement('div');
+      el.className = 'pow-confetti';
+      el.style.left = centerRect.cx + 'px';
+      el.style.top = centerRect.cy + 'px';
+      el.style.background = POW_COLORS[i % POW_COLORS.length];
+      els.stage.appendChild(el);
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 26 + Math.random() * 30;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const anim = el.animate(
+        [
+          { transform: 'translate(-50%,-50%) translate(0,0)', opacity: 1 },
+          { transform: `translate(-50%,-50%) translate(${dx}px, ${dy}px)`, opacity: 0 }
+        ],
+        { duration: 550 + Math.random()*200, easing: 'ease-out' }
+      );
+      anim.onfinish = () => el.remove();
+    }
+  }
+
+  function addIncomingSlot(){
+    const slot = document.createElement('div');
+    slot.className = 'pow-chain-block';
+    slot.id = 'powIncomingSlot';
+    slot.textContent = '+';
+    els.chainStrip.appendChild(slot);
+    return slot;
+  }
+  let incomingSlot = addIncomingSlot();
+
+  function setDifficultyButtonsDisabled(disabled){
+    els.diffDown.disabled = disabled || difficulty <= 1;
+    els.diffUp.disabled = disabled || difficulty >= 4;
+  }
+
+  async function runRound(){
+    if(running) return;
+    runToken++;
+    const myToken = runToken;
+    running = true;
+    els.runBtn.disabled = true;
+    setDifficultyButtonsDisabled(true);
+
+    miners.forEach(m => { m.nonce = 0; m.bar = 0; });
+    renderMiners();
+    log(`Round ${round+1}: mining started at difficulty ${difficulty} (target: ${DIFF_TARGET[difficulty-1]}).`);
+
+    let winnerId = null;
+    const divisor = DIFF_DIVISOR[difficulty-1];
+
+    while(winnerId === null){
+      if(myToken !== runToken) { running = false; return; }
+
+      const hashes = await Promise.all(miners.map(m => sha256Hex(m.id + ':' + m.nonce)));
+      if(myToken !== runToken) { running = false; return; }
+
+      for(let i = 0; i < miners.length; i++){
+        const m = miners[i];
+        const hashEl = document.getElementById('powHash' + m.id);
+        const nonceEl = document.getElementById('powNonce' + m.id);
+        const barEl = document.getElementById('powBar' + m.id);
+        if(hashEl) hashEl.textContent = hashes[i].slice(0, 20) + '…';
+
+        const batch = Math.round((20 + Math.random()*40) * (m.hashpower/20));
+        m.nonce += batch;
+        if(nonceEl) nonceEl.textContent = 'nonce: ' + m.nonce.toLocaleString();
+
+        const jitter = 0.5 + Math.random();
+        m.bar = Math.min(100, m.bar + (m.hashpower/10) * jitter / divisor);
+        if(barEl) barEl.style.width = m.bar + '%';
+
+        if(m.bar >= 100 && winnerId === null) winnerId = m.id;
+      }
+
+      await new Promise(r => setTimeout(r, 70));
+    }
+
+    if(myToken !== runToken) { running = false; return; }
+
+    const winner = miners.find(m => m.id === winnerId);
+    const discardedIds = miners.filter(m => m.id !== winnerId).map(m => m.id);
+    renderMiners(winnerId, []);
+
+    const winnerCard = document.getElementById('powCard' + winnerId);
+    winnerCard.classList.add('winner');
+    document.getElementById('powStatus' + winnerId).textContent = `✅ found it! nonce ${winner.nonce.toLocaleString()}`;
+
+    const fromRect = rectRelativeToStage(winnerCard);
+    const toRect = rectRelativeToStage(incomingSlot);
+    await flyEmoji(fromRect, toRect, '▦', 'block-icon', 700);
+    if(myToken !== runToken) { running = false; return; }
+
+    incomingSlot.classList.add('finalized', 'flash');
+    incomingSlot.textContent = '#' + (round+1);
+    confettiBurst(rectRelativeToStage(incomingSlot));
+    rewardFloat(rectRelativeToStage(winnerCard), '+' + REWARD);
+
+    let roundWasted = 0;
+    discardedIds.forEach(id => {
+      const m = miners.find(x => x.id === id);
+      roundWasted += m.nonce;
+      const card = document.getElementById('powCard' + id);
+      if(card) card.classList.add('discarded');
+      const statusEl = document.getElementById('powStatus' + id);
+      if(statusEl) statusEl.textContent = `✗ discarded — ${m.nonce.toLocaleString()} attempts wasted`;
+    });
+    wastedTotal += roundWasted;
+    els.wastedTotalEl.textContent = wastedTotal.toLocaleString();
+
+    log(`Round ${round+1}: ${winner.name} found a valid hash after ${winner.nonce.toLocaleString()} attempts (hashpower ${winner.hashpower}%). +${REWARD} reward. ${roundWasted.toLocaleString()} attempts wasted by the other miners.`);
+
+    round++;
+    els.roundCounter.textContent = 'Round ' + round;
+    incomingSlot.id = '';
+    incomingSlot = addIncomingSlot();
+
+    running = false;
+    els.runBtn.disabled = false;
+    setDifficultyButtonsDisabled(false);
+
+    if(autoOn && myToken === runToken){
+      setTimeout(() => { if(autoOn) runRound(); }, 1900);
+    }
+  }
+
+  els.runBtn.addEventListener('click', runRound);
+
+  els.autoBtn.addEventListener('click', () => {
+    autoOn = !autoOn;
+    els.autoBtn.textContent = autoOn ? '⏸ Stop auto-run' : '🔁 Auto-run';
+    els.autoBtn.style.background = autoOn ? 'var(--cover)' : '';
+    els.autoBtn.style.color = autoOn ? 'var(--paper)' : '';
+    if(autoOn && !running) runRound();
+  });
+
+  els.diffDown.addEventListener('click', () => {
+    if(running || difficulty <= 1) return;
+    difficulty--;
+    updateDiffDisplay();
+    setDifficultyButtonsDisabled(false);
+  });
+  els.diffUp.addEventListener('click', () => {
+    if(running || difficulty >= 4) return;
+    difficulty++;
+    updateDiffDisplay();
+    setDifficultyButtonsDisabled(false);
+  });
+
+  els.resetBtn.addEventListener('click', () => {
+    runToken++;
+    running = false;
+    autoOn = false;
+    round = 0;
+    wastedTotal = 0;
+    difficulty = 2;
+    els.autoBtn.textContent = '🔁 Auto-run';
+    els.autoBtn.style.background = '';
+    els.autoBtn.style.color = '';
+    els.runBtn.disabled = false;
+    els.roundCounter.textContent = 'Round 0';
+    els.wastedTotalEl.textContent = '0';
+    updateDiffDisplay();
+    setDifficultyButtonsDisabled(false);
+    miners = HASHPOWER.map((hp,i) => ({ id:i, name:MINER_NAMES[i], color:POW_COLORS[i], hashpower:hp, nonce:0, bar:0 }));
+    els.chainStrip.innerHTML = '<span class="pow-chain-placeholder">Chain →</span>';
+    incomingSlot = addIncomingSlot();
+    els.log.innerHTML = '';
+    log('Reset. All miners back to zero.');
+    renderMiners();
+  });
+
+  updateDiffDisplay();
+  renderMiners();
+  log('Ready. Click "Start mining round" to watch five miners race in real time, or "Auto-run" to loop it.');
+})();
+</script>
