@@ -1,0 +1,224 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD; --paper-dim:#E8E1CC; --cover:#1F2A38; --cover-soft:#2C3A4D;
+    --ink:#2B2418; --ink-soft:#5B5240; --rule:#C7BC9C; --rule-strong:#A89A6E;
+    --gold:#9C7A24; --good:#2F5D45; --bad:#8C2F39; --proof:#2F5D6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Newsreader', Georgia, serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 0 70px;}
+  .cover{background:linear-gradient(180deg,var(--cover),var(--cover-soft)); color:var(--paper); padding:38px 32px 28px; border-bottom:6px double var(--gold); position:relative; overflow:hidden;}
+  .cover::before{content:""; position:absolute;inset:0; background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px); pointer-events:none;}
+  .cover-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#C9B978; margin:0 0 10px;}
+  .cover h1{font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.4vw,42px); line-height:1.08; margin:0 0 12px; max-width:640px;}
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 6px;}
+  .prop-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:16px 0 18px;}
+  .prop-grid .box{background:var(--paper-dim); border:1px solid var(--rule); border-radius:6px; padding:12px 14px;}
+  .prop-grid .box h4{margin:0 0 6px; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--gold);}
+  .prop-grid .box p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+  @media (max-width:620px){ .prop-grid{grid-template-columns:1fr;} }
+
+  .diagram-panel{margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim); border-radius:6px; padding:22px 18px 24px;}
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 16px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .hash-row{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px;}
+  .hash-col{flex:1 1 280px; background:#fff; border:1.6px solid var(--rule-strong); border-radius:7px; padding:14px;}
+  .hash-col h4{margin:0 0 8px; font-family:'Fraunces',serif; font-weight:600; font-size:15px;}
+  .hash-col textarea{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:13px; padding:8px 9px;
+    border:1px solid var(--rule-strong); border-radius:4px; resize:vertical; min-height:54px; color:var(--ink); margin-bottom:10px;
+  }
+  .hash-col textarea:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .hash-col .digest-label{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;}
+  .hash-col .digest{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink); word-break:break-all;
+    background:var(--paper-dim); border:1px solid var(--rule); border-radius:4px; padding:8px; min-height:36px;
+  }
+  .hash-col .meta{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin-top:6px;}
+  .preset-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .preset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:4px 9px; border-radius:10px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink-soft); cursor:pointer;
+  }
+  .preset-btn:hover{border-color:var(--gold); color:var(--gold);}
+
+  .diff-banner{
+    background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:11px 16px; margin-bottom:6px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center;
+  }
+  .diff-banner .big{font-size:15px; font-weight:600;}
+  .diff-banner .big.tiny-diff{color:var(--good);}
+  .diff-banner .big.huge-diff{color:var(--bad);}
+
+  .note-box{margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold); background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);}
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+  .footer-note{margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Foundations — Topic 01 of 40</p>
+  <h1>Cryptographic Hash <em>Functions</em></h1>
+  <p>The one-way function that everything else in this course quietly depends on — Merkle trees, block linking, mining, addresses, all of it.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>Any input, one fixed-size fingerprint</h2>
+    <p>A cryptographic hash function takes data of <em>any</em> size — a single letter or an entire movie file — and produces a fixed-length string of bits called a <strong>digest</strong>. Feed it the same input twice, you get the same digest. Change one character, and the digest comes out completely, unpredictably different.</p>
+    <div class="prop-grid">
+      <div class="box"><h4>Deterministic</h4><p>The same input always produces the exact same digest — there's no randomness involved.</p></div>
+      <div class="box"><h4>Fixed-size output</h4><p>A single word and an entire book both come out the same length — 256 bits for SHA-256.</p></div>
+      <div class="box"><h4>Avalanche effect</h4><p>Changing even one character flips roughly half the output bits, with no visible pattern.</p></div>
+      <div class="box"><h4>One-way</h4><p>Going from input to digest is fast. Going from digest back to input is, by design, computationally infeasible.</p></div>
+    </div>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: edit either box below. Real SHA-256, computed live in your browser.</p>
+    <div class="hash-row">
+      <div class="hash-col">
+        <h4>Input A</h4>
+        <textarea id="inputA">Hello, blockchain!</textarea>
+        <div class="digest-label">SHA-256 digest</div>
+        <div class="digest" id="digestA">…</div>
+        <div class="meta" id="metaA"></div>
+        <div class="preset-row">
+          <button class="preset-btn" data-target="A" data-val="a">single letter</button>
+          <button class="preset-btn" data-target="A" data-val="sentence">a sentence</button>
+          <button class="preset-btn" data-target="A" data-val="paragraph">a paragraph</button>
+        </div>
+      </div>
+      <div class="hash-col">
+        <h4>Input B</h4>
+        <textarea id="inputB">Hello, blockchain.</textarea>
+        <div class="digest-label">SHA-256 digest</div>
+        <div class="digest" id="digestB">…</div>
+        <div class="meta" id="metaB"></div>
+        <div class="preset-row">
+          <button class="preset-btn" data-target="B" data-val="a">single letter</button>
+          <button class="preset-btn" data-target="B" data-val="sentence">a sentence</button>
+          <button class="preset-btn" data-target="B" data-val="paragraph">a paragraph</button>
+        </div>
+      </div>
+    </div>
+    <div class="diff-banner">
+      <span>Inputs differ by <span id="charDiff">—</span> character(s).</span>
+      <span>Matching hex characters in the digest: <span class="big" id="hexMatch">—</span></span>
+    </div>
+    <p class="diagram-intro" style="margin:10px 0 0;">Notice both digests are always 64 hex characters (256 bits) — no matter how long or short the input is — and that a one-character difference shares roughly no characters in common with the original. That's the avalanche effect, not a coincidence.</p>
+  </div>
+
+  <div class="note-box">
+    This is exactly the building block behind the Merkle tree from an earlier topic — every node in that tree was just this function, called over and over. It's also what Proof of Work mining actually searches for: a hash function is run billions of times per second, hunting for one input (a "nonce") whose digest happens to start with enough zeros.
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>Quietly everywhere</h2>
+    <ul class="uses-list">
+      <li><strong>Block hashes &amp; Merkle roots</strong> — every block and every transaction tree is identified by a hash, which is exactly why tampering is detectable.</li>
+      <li><strong>Git commit IDs</strong> — every commit hash is a SHA-1 (now migrating to SHA-256) digest of its contents and parent commit, which is why a single changed line gives a totally different commit hash.</li>
+      <li><strong>Password storage</strong> — sites store a hash of your password, never the password itself, so a stolen database doesn't directly hand over your login (though real systems also need salting, which is its own topic).</li>
+      <li><strong>File integrity checks</strong> — software downloads are often published alongside a hash so you can verify the file wasn't corrupted or tampered with in transit.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">This page runs real SHA-256 in your browser via the Web Crypto API — nothing you type is sent anywhere.</p>
+</div>
+
+<script>
+(function(){
+  const PRESETS = {
+    a: 'a',
+    sentence: 'The quick brown fox jumps over the lazy dog.',
+    paragraph: 'Cryptographic hash functions take an input of any length and produce a fixed-size digest. This paragraph is much longer than the single letter or sentence presets, yet its SHA-256 digest will still be exactly sixty-four hexadecimal characters long, same as every other digest on this page.'
+  };
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function countMatchingChars(a, b){
+    let n = 0;
+    const len = Math.min(a.length, b.length);
+    for(let i = 0; i < len; i++) if(a[i] === b[i]) n++;
+    return n;
+  }
+  function levenshteinSmall(a, b){
+    // simple char-diff count for short feedback (not a full edit-distance, just a rough same-length compare + length delta)
+    if(a === b) return 0;
+    const len = Math.max(a.length, b.length);
+    let diff = Math.abs(a.length - b.length);
+    const minLen = Math.min(a.length, b.length);
+    for(let i = 0; i < minLen; i++) if(a[i] !== b[i]) diff++;
+    return diff;
+  }
+
+  const inputA = document.getElementById('inputA');
+  const inputB = document.getElementById('inputB');
+  const digestA = document.getElementById('digestA');
+  const digestB = document.getElementById('digestB');
+  const metaA = document.getElementById('metaA');
+  const metaB = document.getElementById('metaB');
+  const charDiff = document.getElementById('charDiff');
+  const hexMatch = document.getElementById('hexMatch');
+
+  async function recompute(){
+    const a = inputA.value;
+    const b = inputB.value;
+    const [ha, hb] = await Promise.all([sha256Hex(a), sha256Hex(b)]);
+    digestA.textContent = ha;
+    digestB.textContent = hb;
+    metaA.textContent = `input length: ${a.length} chars  →  digest length: 64 hex chars (256 bits)`;
+    metaB.textContent = `input length: ${b.length} chars  →  digest length: 64 hex chars (256 bits)`;
+
+    charDiff.textContent = levenshteinSmall(a, b);
+    const matches = countMatchingChars(ha, hb);
+    hexMatch.textContent = `${matches} of 64`;
+    hexMatch.className = 'big' + (matches >= 40 ? '' : (matches <= 6 ? ' tiny-diff' : ''));
+    // tiny-diff class repurposed: low match count is GOOD (proves avalanche effect), so color it green when low, neutral otherwise
+    if(a === b){
+      hexMatch.className = 'big';
+    } else if(matches <= 10){
+      hexMatch.className = 'big tiny-diff';
+    } else {
+      hexMatch.className = 'big huge-diff';
+    }
+  }
+
+  let debounce = null;
+  function scheduleRecompute(){
+    clearTimeout(debounce);
+    debounce = setTimeout(recompute, 120);
+  }
+  inputA.addEventListener('input', scheduleRecompute);
+  inputB.addEventListener('input', scheduleRecompute);
+
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target === 'A' ? inputA : inputB;
+      target.value = PRESETS[btn.dataset.val];
+      recompute();
+    });
+  });
+
+  recompute();
+})();
+</script>

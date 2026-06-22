@@ -1,0 +1,327 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD; --paper-dim:#E8E1CC; --cover:#1F2A38; --cover-soft:#2C3A4D;
+    --ink:#2B2418; --ink-soft:#5B5240; --rule:#C7BC9C; --rule-strong:#A89A6E;
+    --gold:#9C7A24; --good:#2F5D45; --bad:#8C2F39; --proof:#2F5D6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Newsreader', Georgia, serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 0 70px;}
+  .cover{background:linear-gradient(180deg,var(--cover),var(--cover-soft)); color:var(--paper); padding:38px 32px 28px; border-bottom:6px double var(--gold); position:relative; overflow:hidden;}
+  .cover::before{content:""; position:absolute;inset:0; background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px); pointer-events:none;}
+  .cover-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#C9B978; margin:0 0 10px;}
+  .cover h1{font-family:'Fraunces',serif; font-weight:700; font-size:clamp(26px,4.4vw,42px); line-height:1.08; margin:0 0 12px; max-width:640px;}
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 6px;}
+
+  .compare-row{display:flex; gap:12px; margin:16px 0 18px;}
+  .compare-row .box{flex:1; background:var(--paper-dim); border:1px solid var(--rule); border-radius:6px; padding:12px 14px;}
+  .compare-row .box h4{margin:0 0 6px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--gold);}
+  .compare-row .box p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+  @media (max-width:600px){ .compare-row{flex-direction:column;} }
+
+  .diagram-panel{margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim); border-radius:6px; padding:22px 18px 24px;}
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 16px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .net-svg-wrap{background:#fff; border:1px solid var(--rule-strong); border-radius:6px; padding:10px; margin-bottom:16px;}
+  .net-svg-wrap svg{width:100%; height:auto; display:block;}
+  .edge{stroke:var(--rule-strong); stroke-width:1.6;}
+  .edge.active{stroke:var(--gold); stroke-width:2.4;}
+  .node-circle{fill:#fff; stroke:var(--rule-strong); stroke-width:2; cursor:pointer; transition:fill .2s, stroke .2s;}
+  .node-circle.has-msg{fill:var(--gold); stroke:var(--gold);}
+  .node-circle.origin{stroke:var(--proof); stroke-width:3;}
+  .node-circle.offline{fill:var(--paper-dim); stroke:var(--bad); stroke-dasharray:3,2;}
+  .node-label{font-family:'IBM Plex Mono',monospace; font-size:11px; fill:var(--ink); text-anchor:middle; pointer-events:none;}
+  .node-label.has-msg{fill:#fff;}
+
+  .controls-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
+  .controls-row select{font-family:'IBM Plex Mono',monospace; font-size:12px; padding:7px 9px; border:1px solid var(--rule-strong); border-radius:4px; background:#fff; color:var(--ink);}
+  .btn{font-family:'IBM Plex Mono',monospace; font-size:12px; padding:8px 15px; border-radius:14px; border:1.5px solid var(--cover); background:var(--cover); color:var(--paper); cursor:pointer;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btn.secondary{background:#fff; color:var(--ink-soft); border-color:var(--rule-strong);}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-bottom:14px;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .dot{width:11px;height:11px;border-radius:50%; display:inline-block; border:1.6px solid;}
+  .dot.d-off{background:#fff; border-color:var(--rule-strong);}
+  .dot.d-on{background:var(--gold); border-color:var(--gold);}
+  .dot.d-origin{background:#fff; border-color:var(--proof);}
+  .dot.d-offline{background:var(--paper-dim); border-color:var(--bad);}
+
+  .net-log{background:#fff; border:1px solid var(--rule-strong); border-radius:4px; padding:10px 14px; max-height:150px; overflow-y:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);}
+  .net-log p{margin:0 0 5px;}
+  .net-log p:last-child{margin-bottom:0;}
+  .hint-line{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin:0 0 14px;}
+
+  .note-box{margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold); background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);}
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+  .footer-note{margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Foundations — Topic 04 of 40</p>
+  <h1>Peer-to-Peer <em>Networks</em></h1>
+  <p>No server, no hub, no single company keeping the lights on — just nodes, talking directly to a handful of neighbors, until everyone knows.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>Everyone's a client. Everyone's a server.</h2>
+    <p>In a traditional client-server setup, your device talks to one central machine that everyone depends on. A peer-to-peer (P2P) network has no center at all — every node connects directly to a handful of other nodes ("peers"), and information spreads hop by hop through those connections, like a rumor passed person to person, until the whole network has heard it. This is called <strong>gossip</strong>.</p>
+    <div class="compare-row">
+      <div class="box"><h4>Client–Server</h4><p>Everyone connects to one hub. Fast and simple — until that hub goes down, gets censored, or becomes a single point of control.</p></div>
+      <div class="box"><h4>Peer-to-Peer</h4><p>No hub to take down. Slower to propagate hop by hop, but no single party can shut the whole thing off.</p></div>
+    </div>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: pick a node to broadcast from, then watch the message spread hop by hop. Click any node to take it offline first and see what that does to the spread.</p>
+
+    <div class="legend">
+      <span><span class="dot d-off"></span> hasn't received it yet</span>
+      <span><span class="dot d-on"></span> has the message</span>
+      <span><span class="dot d-origin"></span> broadcast origin</span>
+      <span><span class="dot d-offline"></span> offline (click any node to toggle)</span>
+    </div>
+
+    <div class="net-svg-wrap">
+      <svg viewBox="0 0 640 320" id="netSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="controls-row">
+      <label for="originSelect" style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);">Broadcast from:</label>
+      <select id="originSelect"></select>
+      <button class="btn" id="broadcastBtn">▶ Broadcast</button>
+      <button class="btn secondary" id="resetMsgBtn">↺ Reset message state</button>
+      <button class="btn secondary" id="resetAllBtn">↺ Bring all nodes online</button>
+    </div>
+
+    <p class="hint-line">Try it: take Node 3 and Node 5 offline, then broadcast from Node 0 — watch Node 4 get cut off entirely, even though the rest of the network is fine.</p>
+
+    <div class="net-log" id="netLog"></div>
+  </div>
+
+  <div class="note-box">
+    Notice what this demo shows and doesn't show: most of the time, a P2P network easily routes around a few missing nodes — that's the resilience everyone talks about. But it isn't magic. If <em>every</em> path to a node happens to run through nodes that are down, that node gets cut off regardless of how decentralized the network is. Resilience comes from redundant connections, not from having no center.
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>This is how blocks and transactions actually travel</h2>
+    <ul class="uses-list">
+      <li><strong>New transactions</strong> reach the entire Bitcoin or Ethereum network this exact way — gossiped peer to peer until every node has seen them, with no central broadcaster.</li>
+      <li><strong>Newly mined blocks</strong> propagate the same way, which is part of why the "fork" scenario from an earlier topic happens: a brand-new block hasn't gossiped everywhere yet when a second one shows up.</li>
+      <li><strong>BitTorrent, IPFS</strong>, and most decentralized systems use the same gossip idea for spreading data without anyone running a central server.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">This is a simplified 10-node simulation. Real networks gossip among thousands of peers with more redundant connections than shown here.</p>
+</div>
+
+<script>
+(function(){
+  const N = 10;
+  const EDGES = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,0],[0,5],[2,8],[3,7]];
+
+  const state = {
+    offline: new Set(),
+    hasMsg: new Set(),
+    origin: null,
+    running: false
+  };
+
+  const svg = document.getElementById('netSvg');
+  const originSelect = document.getElementById('originSelect');
+  const broadcastBtn = document.getElementById('broadcastBtn');
+  const resetMsgBtn = document.getElementById('resetMsgBtn');
+  const resetAllBtn = document.getElementById('resetAllBtn');
+  const log = document.getElementById('netLog');
+
+  function nodePos(i){
+    const cx = 320, cy = 160, r = 125;
+    const angle = (Math.PI * 2 * i / N) - Math.PI / 2;
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  }
+
+  function logMsg(msg){
+    const p = document.createElement('p');
+    p.textContent = msg;
+    log.appendChild(p);
+    while(log.children.length > 30) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function rebuildOriginSelect(){
+    const prev = originSelect.value;
+    const opts = [];
+    for(let i = 0; i < N; i++){
+      if(!state.offline.has(i)) opts.push(i);
+    }
+    originSelect.innerHTML = opts.map(i => `<option value="${i}">Node ${i}</option>`).join('');
+    if(opts.includes(parseInt(prev,10))) originSelect.value = prev;
+  }
+
+  function render(){
+    let html = '';
+    // edges first (under nodes)
+    EDGES.forEach(([a,b]) => {
+      const pa = nodePos(a), pb = nodePos(b);
+      const active = state.hasMsg.has(a) && state.hasMsg.has(b);
+      html += `<line class="edge${active?' active':''}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}"></line>`;
+    });
+    for(let i = 0; i < N; i++){
+      const p = nodePos(i);
+      const isOffline = state.offline.has(i);
+      const hasMsg = state.hasMsg.has(i);
+      const isOrigin = state.origin === i;
+      let cls = 'node-circle';
+      if(isOffline) cls += ' offline';
+      else if(hasMsg) cls += ' has-msg';
+      if(isOrigin && !isOffline) cls += ' origin';
+      html += `<circle class="${cls}" data-idx="${i}" cx="${p.x}" cy="${p.y}" r="20"></circle>`;
+      html += `<text class="node-label${hasMsg && !isOffline ? ' has-msg' : ''}" x="${p.x}" y="${p.y+4}">${i}</text>`;
+    }
+    svg.innerHTML = html;
+
+    svg.querySelectorAll('.node-circle').forEach(c => {
+      c.addEventListener('click', () => {
+        if(state.running) return;
+        const idx = parseInt(c.dataset.idx, 10);
+        if(state.offline.has(idx)){
+          state.offline.delete(idx);
+          logMsg(`Node ${idx} is back online.`);
+        } else {
+          state.offline.add(idx);
+          state.hasMsg.delete(idx);
+          if(state.origin === idx) state.origin = null;
+          logMsg(`Node ${idx} taken offline.`);
+        }
+        rebuildOriginSelect();
+        render();
+      });
+    });
+  }
+
+  function buildAdjacency(){
+    const adj = Array.from({length:N}, () => []);
+    EDGES.forEach(([a,b]) => {
+      if(!state.offline.has(a) && !state.offline.has(b)){
+        adj[a].push(b);
+        adj[b].push(a);
+      }
+    });
+    return adj;
+  }
+
+  function bfsDistances(origin){
+    const adj = buildAdjacency();
+    const dist = Array(N).fill(Infinity);
+    dist[origin] = 0;
+    const queue = [origin];
+    while(queue.length){
+      const cur = queue.shift();
+      for(const next of adj[cur]){
+        if(dist[next] === Infinity){
+          dist[next] = dist[cur] + 1;
+          queue.push(next);
+        }
+      }
+    }
+    return dist;
+  }
+
+  let runToken = 0;
+
+  function runBroadcast(){
+    if(state.running) return;
+    const origin = parseInt(originSelect.value, 10);
+    if(Number.isNaN(origin) || state.offline.has(origin)) return;
+
+    runToken++;
+    const myToken = runToken;
+
+    state.hasMsg.clear();
+    state.origin = origin;
+    state.running = true;
+    broadcastBtn.disabled = true;
+    logMsg(`Broadcast started from Node ${origin}.`);
+    render();
+
+    const dist = bfsDistances(origin);
+    const maxFiniteDist = Math.max(0, ...dist.filter(d => d !== Infinity));
+    let round = 0;
+
+    function step(){
+      if(myToken !== runToken) return;
+      if(round > maxFiniteDist){
+        const unreached = [];
+        for(let i = 0; i < N; i++){
+          if(!state.offline.has(i) && dist[i] === Infinity) unreached.push(i);
+        }
+        if(unreached.length === 0){
+          logMsg(`\u2705 All online nodes received the message after ${maxFiniteDist} hop(s).`);
+        } else {
+          logMsg(`\u26a0 ${unreached.length} node(s) never received the message: ${unreached.map(i=>'Node '+i).join(', ')}.`);
+        }
+        state.running = false;
+        broadcastBtn.disabled = false;
+        return;
+      }
+      const atThisRound = [];
+      for(let i = 0; i < N; i++){
+        if(dist[i] === round){ state.hasMsg.add(i); atThisRound.push(i); }
+      }
+      if(atThisRound.length){
+        logMsg(round === 0
+          ? `Round 0: Node ${origin} originates the message.`
+          : `Round ${round}: reaches ${atThisRound.map(i=>'Node '+i).join(', ')}.`);
+      }
+      render();
+      round++;
+      setTimeout(step, 500);
+    }
+    step();
+  }
+
+  broadcastBtn.addEventListener('click', runBroadcast);
+
+  resetMsgBtn.addEventListener('click', () => {
+    runToken++;
+    state.hasMsg.clear();
+    state.origin = null;
+    state.running = false;
+    broadcastBtn.disabled = false;
+    logMsg('Message state reset.');
+    render();
+  });
+
+  resetAllBtn.addEventListener('click', () => {
+    runToken++;
+    state.offline.clear();
+    state.hasMsg.clear();
+    state.origin = null;
+    state.running = false;
+    broadcastBtn.disabled = false;
+    rebuildOriginSelect();
+    logMsg('All nodes brought back online.');
+    render();
+  });
+
+  rebuildOriginSelect();
+  render();
+  logMsg('Ready. Pick a broadcast origin and click Broadcast — or take a node offline first.');
+})();
+</script>

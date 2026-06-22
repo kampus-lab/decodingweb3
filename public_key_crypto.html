@@ -1,0 +1,293 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD; --paper-dim:#E8E1CC; --cover:#1F2A38; --cover-soft:#2C3A4D;
+    --ink:#2B2418; --ink-soft:#5B5240; --rule:#C7BC9C; --rule-strong:#A89A6E;
+    --gold:#9C7A24; --good:#2F5D45; --bad:#8C2F39; --proof:#2F5D6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Newsreader', Georgia, serif; font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 0 70px;}
+  .cover{background:linear-gradient(180deg,var(--cover),var(--cover-soft)); color:var(--paper); padding:38px 32px 28px; border-bottom:6px double var(--gold); position:relative; overflow:hidden;}
+  .cover::before{content:""; position:absolute;inset:0; background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px); pointer-events:none;}
+  .cover-eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#C9B978; margin:0 0 10px;}
+  .cover h1{font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,4.2vw,40px); line-height:1.1; margin:0 0 12px; max-width:660px;}
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:580px; color:#D8D2BE; margin:0; font-size:15px;}
+  .section{margin:34px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0 0 12px; color:var(--ink);}
+  .section p{margin:0 0 14px; font-size:15.5px; color:var(--ink);}
+  .section p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .kicker{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 6px;}
+
+  .diagram-panel{margin:18px 24px 0; border:1px solid var(--rule); background:var(--paper-dim); border-radius:6px; padding:22px 18px 24px;}
+  .diagram-intro{font-size:14px; color:var(--ink-soft); margin:0 0 16px; font-family:'IBM Plex Mono',monospace; line-height:1.5;}
+
+  .steps{display:flex; flex-direction:column; gap:14px;}
+  .step{background:#fff; border:1.6px solid var(--rule-strong); border-radius:7px; padding:14px 16px; opacity:.5; transition:opacity .2s;}
+  .step.enabled{opacity:1;}
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .step-num{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; width:22px; height:22px; border-radius:50%;
+    background:var(--paper-dim); border:1.5px solid var(--rule-strong); display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .step.enabled .step-num{border-color:var(--gold); color:var(--gold);}
+  .step h4{margin:0; font-family:'Fraunces',serif; font-weight:600; font-size:15.5px; flex:1 1 auto;}
+  .step p.step-desc{margin:0 0 10px; font-size:13.5px; color:var(--ink-soft);}
+
+  .key-display{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--paper-dim); border:1px solid var(--rule);
+    border-radius:4px; padding:9px; word-break:break-all; margin-bottom:8px;
+  }
+  .key-label{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;}
+  .secret-note{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--bad); background:rgba(140,47,57,0.08); border:1px solid var(--bad); border-radius:4px; padding:8px; margin-bottom:8px;}
+
+  textarea.msg-input{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:13px; padding:8px 9px;
+    border:1px solid var(--rule-strong); border-radius:4px; resize:vertical; min-height:46px; color:var(--ink); margin-bottom:8px;
+  }
+  textarea.msg-input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  textarea.msg-input:disabled{background:var(--paper-dim); color:var(--ink-soft);}
+
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:8px 15px; border-radius:14px;
+    border:1.5px solid var(--cover); background:var(--cover); color:var(--paper); cursor:pointer;
+  }
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btn.secondary{background:#fff; color:var(--ink-soft); border-color:var(--rule-strong);}
+
+  .verify-select{font-family:'IBM Plex Mono',monospace; font-size:12px; padding:7px 9px; border:1px solid var(--rule-strong); border-radius:4px; background:#fff; color:var(--ink); margin-bottom:10px;}
+
+  .verdict{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:10px 14px; border-radius:5px; margin-top:6px; display:none;
+  }
+  .verdict.show{display:block;}
+  .verdict.valid{background:rgba(47,93,69,0.12); color:var(--good); border:1px solid var(--good);}
+  .verdict.invalid{background:rgba(140,47,57,0.12); color:var(--bad); border:1px solid var(--bad);}
+
+  .row-gap{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
+  .note-box{margin:26px 32px 0; padding:14px 18px; border-left:3px solid var(--gold); background:var(--paper-dim); font-size:14.5px; color:var(--ink-soft);}
+  .uses-list{margin:0; padding-left:20px; font-size:15px;}
+  .uses-list li{margin-bottom:8px;}
+  .footer-note{margin:34px 32px 0; font-size:12.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Foundations — Topic 02 of 40</p>
+  <h1>Public-Key Cryptography &amp; <em>Digital Signatures</em></h1>
+  <p>How "I own this" gets proven on a blockchain — without a password, an ID card, or anyone to ask.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">What it is</p>
+    <h2>Two keys, one secret, one shareable</h2>
+    <p>Public-key cryptography gives you a mathematically linked pair of keys. The <strong>private key</strong> never leaves your device and never gets shared. The <strong>public key</strong> is meant to be handed out freely — it's how others identify you.</p>
+    <p>The part that matters for blockchains isn't encryption — it's <strong>signing</strong>. Sign a message with your private key, and anyone holding your public key can confirm two things at once: that the message really came from whoever holds that private key, and that it hasn't been altered since. No password, no central authority checking IDs — just math.</p>
+  </div>
+
+  <div class="diagram-panel">
+    <p class="diagram-intro">Try it: walk through generating a real keypair, signing a message, and verifying it — using actual ECDSA in your browser, not a simulation.</p>
+
+    <div class="steps">
+      <div class="step enabled" id="step1">
+        <div class="step-head"><span class="step-num">1</span><h4>Generate a keypair</h4></div>
+        <p class="step-desc">This creates a real private/public ECDSA (P-256) keypair locally in your browser.</p>
+        <button class="btn" id="genKeyBtn">🔑 Generate keypair</button>
+        <div id="keyOutput" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="step" id="step2">
+        <div class="step-head"><span class="step-num">2</span><h4>Sign a message</h4></div>
+        <p class="step-desc">Signing uses your private key. It never has to leave your browser to do this.</p>
+        <textarea class="msg-input" id="msgInput" disabled>Send 2 BTC to Bob</textarea>
+        <div class="row-gap">
+          <button class="btn" id="signBtn" disabled>✍ Sign message</button>
+        </div>
+        <div id="sigOutput" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="step" id="step3">
+        <div class="step-head"><span class="step-num">3</span><h4>Verify the signature</h4></div>
+        <p class="step-desc">Verifying only needs the public key — never the private one. Try editing the message above after signing, or verifying against a different public key below.</p>
+        <div class="row-gap" style="margin-bottom:10px;">
+          <label for="verifyKeySelect" style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft);">Verify against:</label>
+          <select class="verify-select" id="verifyKeySelect"></select>
+          <button class="btn secondary" id="genImposterBtn">+ Generate a second ("imposter") keypair</button>
+        </div>
+        <button class="btn" id="verifyBtn" disabled>✅ Verify signature</button>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    Notice the private key is never displayed anywhere on this page — not even truncated. That's deliberate: in a real wallet, your private key (or the seed phrase it's derived from) is the <em>only</em> thing standing between you and your funds. There's no "forgot password" link. Lose the key, lose access, permanently.
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where this shows up</p>
+    <h2>This is what a wallet actually is</h2>
+    <ul class="uses-list">
+      <li><strong>Your wallet address</strong> is derived from your public key. Anyone can send funds to it; only your private key can authorize spending from it.</li>
+      <li><strong>Every transaction</strong> you send is signed exactly like the demo above — the network checks your signature against your public key before accepting it.</li>
+      <li><strong>Validators in Proof-of-Stake</strong> sign their votes the same way, so the network can prove afterward exactly who voted for what — and slash the ones who signed conflicting blocks.</li>
+    </ul>
+  </div>
+
+  <p class="footer-note">This page uses real ECDSA (P-256) via the Web Crypto API — genuine keys, genuine signatures, generated and verified entirely in your browser.</p>
+</div>
+
+<script>
+(function(){
+  const state = {
+    signerKeyPair: null,
+    imposterKeyPair: null,
+    signature: null,
+    signedMessage: null
+  };
+
+  const genKeyBtn = document.getElementById('genKeyBtn');
+  const keyOutput = document.getElementById('keyOutput');
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  const msgInput = document.getElementById('msgInput');
+  const signBtn = document.getElementById('signBtn');
+  const sigOutput = document.getElementById('sigOutput');
+  const verifyKeySelect = document.getElementById('verifyKeySelect');
+  const genImposterBtn = document.getElementById('genImposterBtn');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const verdict = document.getElementById('verdict');
+
+  function bufToHex(buf){
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function truncateHex(hex, n){ return hex.slice(0, n || 24) + '…'; }
+
+  async function exportPublicKeyHex(publicKey){
+    const raw = await crypto.subtle.exportKey('raw', publicKey);
+    return bufToHex(raw);
+  }
+
+  async function generateKeyPair(){
+    return crypto.subtle.generateKey(
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      true,
+      ['sign', 'verify']
+    );
+  }
+
+  function rebuildVerifySelect(){
+    const opts = [];
+    if(state.signerKeyPair) opts.push({ id: 'signer', label: "Signer's public key (correct)" });
+    if(state.imposterKeyPair) opts.push({ id: 'imposter', label: "Imposter's public key (wrong)" });
+    verifyKeySelect.innerHTML = opts.map(o => `<option value="${o.id}">${o.label}</option>`).join('');
+  }
+
+  genKeyBtn.addEventListener('click', async () => {
+    genKeyBtn.disabled = true;
+    genKeyBtn.textContent = 'Generating…';
+    state.signerKeyPair = await generateKeyPair();
+    const pubHex = await exportPublicKeyHex(state.signerKeyPair.publicKey);
+    keyOutput.innerHTML = `
+      <div class="key-label">Public key (shareable)</div>
+      <div class="key-display">${pubHex}</div>
+      <div class="secret-note">🔒 Private key generated and held in browser memory — it is never displayed, exported, or sent anywhere.</div>
+    `;
+    genKeyBtn.textContent = '🔑 Regenerate keypair';
+    genKeyBtn.disabled = false;
+
+    step2.classList.add('enabled');
+    msgInput.disabled = false;
+    signBtn.disabled = false;
+    rebuildVerifySelect();
+
+    // invalidate any previous signature since it belongs to the old key
+    state.signature = null;
+    sigOutput.innerHTML = '';
+    verifyBtn.disabled = true;
+    verdict.classList.remove('show');
+  });
+
+  signBtn.addEventListener('click', async () => {
+    if(!state.signerKeyPair) return;
+    const message = msgInput.value;
+    const enc = new TextEncoder().encode(message);
+    const sigBuf = await crypto.subtle.sign(
+      { name: 'ECDSA', hash: 'SHA-256' },
+      state.signerKeyPair.privateKey,
+      enc
+    );
+    state.signature = sigBuf;
+    state.signedMessage = message;
+    const sigHex = bufToHex(sigBuf);
+    sigOutput.innerHTML = `
+      <div class="key-label">Signature</div>
+      <div class="key-display">${truncateHex(sigHex, 48)}</div>
+    `;
+    step3.classList.add('enabled');
+    verifyBtn.disabled = false;
+    verdict.classList.remove('show');
+  });
+
+  genImposterBtn.addEventListener('click', async () => {
+    genImposterBtn.disabled = true;
+    genImposterBtn.textContent = 'Generating…';
+    state.imposterKeyPair = await generateKeyPair();
+    rebuildVerifySelect();
+    verifyKeySelect.value = 'imposter';
+    genImposterBtn.textContent = '✓ Imposter keypair ready';
+  });
+
+  verifyBtn.addEventListener('click', async () => {
+    if(!state.signature) return;
+    const keyChoice = verifyKeySelect.value;
+    const keyPair = keyChoice === 'imposter' ? state.imposterKeyPair : state.signerKeyPair;
+    if(!keyPair){ return; }
+
+    const currentMessage = msgInput.value;
+    const enc = new TextEncoder().encode(currentMessage);
+
+    let valid = false;
+    try{
+      valid = await crypto.subtle.verify(
+        { name: 'ECDSA', hash: 'SHA-256' },
+        keyPair.publicKey,
+        state.signature,
+        enc
+      );
+    } catch(e){
+      valid = false;
+    }
+
+    verdict.classList.add('show');
+    if(valid){
+      verdict.className = 'verdict show valid';
+      verdict.textContent = '✅ Valid — this message was signed by the holder of the selected private key, and has not been altered.';
+    } else {
+      const tampered = currentMessage !== state.signedMessage;
+      const wrongKey = keyChoice === 'imposter';
+      let reason = 'the signature does not match.';
+      if(tampered && wrongKey) reason = 'the message was edited AND the wrong public key was used.';
+      else if(tampered) reason = 'the message was edited after signing — even one character breaks the signature.';
+      else if(wrongKey) reason = "this is the imposter's public key, not the signer's — it can't validate a signature it didn't make.";
+      verdict.className = 'verdict show invalid';
+      verdict.textContent = `❌ Invalid — ${reason}`;
+    }
+  });
+
+  // Re-enable verify whenever the message is edited after a signature exists, so the user can re-test tampering
+  msgInput.addEventListener('input', () => {
+    if(state.signature){
+      verifyBtn.disabled = false;
+    }
+  });
+})();
+</script>
