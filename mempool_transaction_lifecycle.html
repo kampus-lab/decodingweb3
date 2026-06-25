@@ -1,0 +1,379 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --tx-you:#6B4C7A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,4.2vw,40px);
+    line-height:1.1; margin:0 0 12px; max-width:680px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:600px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:30px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin:0 0 10px; color:var(--ink);}
+  .section p{margin:0 0 12px; font-size:15.5px; color:var(--ink);}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+  .note{
+    margin:14px 0 0; padding:12px 16px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14px; color:var(--ink-soft);
+  }
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0 0;}
+  @media(max-width:560px){ .two-col{grid-template-columns:1fr;} }
+  .two-col h4{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 6px;}
+  .two-col ul{margin:0; padding-left:17px; font-size:13.5px;}
+  .two-col li{margin-bottom:5px;}
+  .flow-steps{margin:16px 0 0; display:flex; flex-wrap:wrap; gap:0; align-items:center;}
+  .flow-steps .step{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:var(--paper-dim);
+    border:1px solid var(--rule); border-radius:4px; padding:9px 13px; color:var(--ink);
+  }
+  .flow-steps .arrow{font-family:'IBM Plex Mono',monospace; color:var(--gold); padding:0 8px; font-size:14px;}
+
+  /* ---------- Panel (simulator) ---------- */
+  .panel{
+    margin:22px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:20px 18px 22px;
+  }
+  .panel-title{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 14px;}
+  .sim-hint{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 16px;}
+
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px;}
+  .controls select{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:9px 11px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink); border-radius:2px;
+  }
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.03em; padding:9px 14px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink); border-radius:2px; cursor:pointer;
+  }
+  .btn:hover{background:var(--paper);}
+  .btn.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  .sim-metrics{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:20px;}
+  .sim-metric{background:#fff; border:1px solid var(--rule); border-radius:4px; padding:11px 13px;}
+  .sim-metric .lbl{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 5px;}
+  .sim-metric .val{font-family:'Fraunces',serif; font-weight:600; font-size:18px; margin:0; color:var(--ink);}
+
+  .stepper{display:flex; flex-wrap:wrap; gap:0; align-items:center; margin-bottom:6px;}
+  .stepper .step{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; background:#fff;
+    border:1px solid var(--rule); border-radius:4px; padding:9px 12px; color:var(--ink-soft); text-align:center;
+  }
+  .stepper .step.done{border-color:var(--gold); color:var(--gold); background:#fff;}
+  .stepper .step.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+  .stepper .arrow{font-family:'IBM Plex Mono',monospace; color:var(--gold); padding:0 6px; font-size:13px;}
+  .stepper-sub{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin:0 0 20px;}
+
+  .sim-mempool-title{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:18px 0 8px;}
+  .sim-row{display:flex; align-items:center; gap:12px; padding:7px 10px; border-bottom:1px dotted var(--rule); font-family:'IBM Plex Mono',monospace; font-size:12px;}
+  .sim-row:last-child{border-bottom:none;}
+  .sim-row .name{min-width:130px; font-weight:500; color:var(--ink-soft);}
+  .sim-row .stat{color:var(--ink-soft);}
+  .sim-row.mine{background:#fff; border:1px solid var(--tx-you); border-bottom:1px solid var(--tx-you); border-radius:3px; margin-bottom:3px;}
+  .sim-row.mine .name{color:var(--tx-you);}
+  .sim-more{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); padding:6px 10px 0;}
+
+  .footer-note{
+    margin:30px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Core Blockchain Mechanics — Topic 08 of 40</p>
+  <h1>Mempool &amp; Transaction Lifecycle: <em>From Signature to Settled</em></h1>
+  <p>Signing a transaction doesn't put it on the chain — it puts it in an unsynced waiting room first. Send one through yourself and watch every stage in between.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">The journey</p>
+    <h2>Six stages, one transaction</h2>
+    <p>A transaction does not jump straight onto the chain the moment you sign it. It passes through a short pipeline, and at any stage along the way it can stall, get bumped by something with a higher fee, or simply wait its turn.</p>
+    <div class="flow-steps">
+      <span class="step">Sign transaction</span><span class="arrow">→</span>
+      <span class="step">Broadcast</span><span class="arrow">→</span>
+      <span class="step">Mempool</span><span class="arrow">→</span>
+      <span class="step">Validator selects</span><span class="arrow">→</span>
+      <span class="step">New block</span><span class="arrow">→</span>
+      <span class="step">Confirmed</span>
+    </div>
+    <p class="note"><b>Worth remembering:</b> none of this is instant or guaranteed until the last step. A signed transaction sitting in a mempool can still be replaced or dropped.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">What is a mempool</p>
+    <h2>A waiting room with no single copy</h2>
+    <p>Mempool — memory pool — is the set of transactions a node has heard about but that haven't been confirmed into a block yet. Every full node keeps its own copy in memory, built only from whatever it has personally received and verified so far.</p>
+    <p>That copy is not identical everywhere. Propagation takes time, so two nodes can briefly disagree about exactly which transactions are pending — one might have already heard about a transaction the other hasn't seen yet.</p>
+    <div class="two-col">
+      <div>
+        <h4>Node A's mempool</h4>
+        <ul>
+          <li>Tx #41 — fee 18</li>
+          <li>Tx #44 — fee 12</li>
+          <li>Tx #46 — fee 9</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Node B's mempool</h4>
+        <ul>
+          <li>Tx #41 — fee 18</li>
+          <li>Tx #45 — fee 14</li>
+          <li>Tx #46 — fee 9</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Simulator — send a transaction and track it</p>
+    <p class="sim-hint">Pick a fee, sign and broadcast, then mine blocks to watch it move through the mempool. If it gets stuck behind higher bidders, try speeding it up.</p>
+
+    <div class="controls">
+      <label for="feeSelect" class="sr-only">Fee level</label>
+      <select id="feeSelect">
+        <option value="low">Low fee</option>
+        <option value="normal" selected>Normal fee</option>
+        <option value="high">High fee</option>
+      </select>
+      <button id="sendBtn" class="btn">Sign &amp; broadcast</button>
+      <button id="mineBtn" class="btn">Mine next block</button>
+      <button id="autoBtn" class="btn">Auto-mine</button>
+      <button id="speedUpBtn" class="btn" disabled>Speed up (+fee)</button>
+      <button id="resetBtn" class="btn">Reset</button>
+    </div>
+
+    <div class="sim-metrics">
+      <div class="sim-metric"><p class="lbl">Chain height</p><p class="val" id="blockNumOut">0</p></div>
+      <div class="sim-metric"><p class="lbl">Mempool size</p><p class="val" id="mempoolCountOut">0</p></div>
+      <div class="sim-metric"><p class="lbl">Your transaction</p><p class="val" id="statusOut" style="font-size:14px;">not sent yet</p></div>
+    </div>
+
+    <div class="stepper" id="stepper"></div>
+    <p class="stepper-sub" id="stepperSub">&nbsp;</p>
+
+    <p class="sim-mempool-title">Mempool — <span id="mempoolListCountOut">0</span> pending</p>
+    <div id="mempoolList"></div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">When it gets stuck</p>
+    <h2>Stuck transactions and replace-by-fee</h2>
+    <p>If your fee is too low relative to everyone else waiting, validators simply keep picking other transactions ahead of you, block after block. Your transaction is not failed — it is just losing every auction.</p>
+    <p>Most wallets let you fix this with replace-by-fee (RBF): you resubmit the same transaction with the same nonce but a higher fee, telling the network the new version should be considered instead of the old one. Sending a replacement with the original amount set to zero is the common way to effectively cancel a stuck transaction.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Why your node sees something different</p>
+    <h2>There is no global mempool</h2>
+    <p>Because every node's view is independently assembled, two wallets — or a wallet and a block explorer — can briefly show conflicting "pending" states for the same transaction. Mempools also have a size limit: when they fill up, nodes evict the lowest-fee entries to make room, which is part of why chronically underpriced transactions eventually vanish rather than waiting forever.</p>
+  </div>
+
+  <p class="footer-note">Topic 08 of 40 — Core Blockchain Mechanics. Simulator numbers are abstracted demo units for clarity, not real mainnet values.</p>
+</div>
+
+<script>
+(function(){
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  const FEE_LEVELS = {low:9, normal:20, high:34};
+  const CAPACITY = 20;
+  const FINAL_AT = 6;
+
+  const state = {
+    blockNum:0, ambient:[], nextId:1,
+    userTx:null, autoTimer:null
+  };
+
+  function spawnAmbient(){
+    const n = randInt(2,5);
+    for(let i=0;i<n;i++){
+      state.ambient.push({id:state.nextId++, gas:randInt(2,6), fee:randInt(5,40)});
+    }
+    if(state.ambient.length>30){
+      state.ambient.sort((a,b)=>b.fee-a.fee);
+      state.ambient = state.ambient.slice(0,30);
+    }
+  }
+
+  function renderStepper(){
+    const labels = ['Signed','Broadcast','Mempool','Included','Confirmed'];
+    let doneCount, activeIdx;
+    if(!state.userTx){ doneCount=-1; activeIdx=-1; }
+    else if(state.userTx.status==='mempool'){ doneCount=2; activeIdx=2; }
+    else { doneCount=3; activeIdx=4; }
+    let html='';
+    labels.forEach((label,i)=>{
+      let cls='step';
+      if(i<=doneCount) cls+=' done';
+      if(i===activeIdx) cls+=' active';
+      html += '<span class="'+cls+'">'+label+'</span>';
+      if(i<labels.length-1) html += '<span class="arrow">→</span>';
+    });
+    document.getElementById('stepper').innerHTML = html;
+
+    const sub = document.getElementById('stepperSub');
+    if(!state.userTx) sub.innerHTML='&nbsp;';
+    else if(state.userTx.status==='mempool') sub.textContent = 'waiting '+state.userTx.waitRounds+' block(s), current fee '+state.userTx.fee;
+    else {
+      const c = state.userTx.confirmations;
+      sub.textContent = c>=FINAL_AT ? c+'/'+FINAL_AT+' confirmations — considered final' : c+'/'+FINAL_AT+' confirmations';
+    }
+  }
+
+  function rowHtml(t, mine){
+    return '<div class="sim-row'+(mine?' mine':'')+'">'
+      + '<span class="name">'+(mine?'Tx (you)':'Tx #'+t.id)+'</span>'
+      + '<span class="stat">gas '+t.gas+'</span>'
+      + '<span class="stat">fee '+t.fee+'</span>'
+      + '</div>';
+  }
+
+  function renderMempool(){
+    let pool = state.ambient.map(t=>({...t, mine:false}));
+    if(state.userTx && state.userTx.status==='mempool'){
+      pool.push({id:'you', gas:state.userTx.gas, fee:state.userTx.fee, mine:true});
+    }
+    pool.sort((a,b)=>b.fee-a.fee);
+    const shown = pool.slice(0,10);
+    let html = shown.map(t=>rowHtml(t, t.mine)).join('');
+    if(pool.length>10) html += '<p class="sim-more">+'+(pool.length-10)+' more waiting</p>';
+    if(!pool.length) html = '<p class="sim-more">mempool empty</p>';
+    document.getElementById('mempoolList').innerHTML = html;
+    document.getElementById('mempoolCountOut').textContent = state.ambient.length;
+    document.getElementById('mempoolListCountOut').textContent = pool.length;
+  }
+
+  function renderStatus(){
+    const out = document.getElementById('statusOut');
+    if(!state.userTx) out.textContent = 'not sent yet';
+    else if(state.userTx.status==='mempool') out.textContent = 'pending, fee '+state.userTx.fee;
+    else {
+      const c = state.userTx.confirmations;
+      out.textContent = c>=FINAL_AT ? 'final' : c+'/'+FINAL_AT+' confirmations';
+    }
+    document.getElementById('blockNumOut').textContent = state.blockNum;
+    document.getElementById('speedUpBtn').disabled = !(state.userTx && state.userTx.status==='mempool');
+  }
+
+  function render(){
+    renderMempool();
+    renderStepper();
+    renderStatus();
+  }
+
+  function mineBlock(){
+    spawnAmbient();
+    const wasIncludedBefore = state.userTx && state.userTx.status==='included';
+
+    let pool = state.ambient.map(t=>({ref:t, fee:t.fee, gas:t.gas, mine:false}));
+    if(state.userTx && state.userTx.status==='mempool'){
+      pool.push({ref:state.userTx, fee:state.userTx.fee, gas:state.userTx.gas, mine:true});
+    }
+    pool.sort((a,b)=>b.fee-a.fee);
+    let used=0; const included=[];
+    for(const t of pool){ if(used+t.gas<=CAPACITY){ included.push(t); used+=t.gas; } }
+
+    const includedAmbientIds = new Set(included.filter(t=>!t.mine).map(t=>t.ref.id));
+    state.ambient = state.ambient.filter(t=>!includedAmbientIds.has(t.id));
+
+    const userIncludedNow = included.some(t=>t.mine);
+    if(userIncludedNow){
+      state.userTx.status='included';
+      state.userTx.confirmations=1;
+    } else if(wasIncludedBefore){
+      state.userTx.confirmations++;
+    } else if(state.userTx && state.userTx.status==='mempool'){
+      state.userTx.waitRounds++;
+    }
+    state.blockNum++;
+    render();
+  }
+
+  function sendTx(){
+    const level = document.getElementById('feeSelect').value;
+    state.userTx = {gas:4, fee:FEE_LEVELS[level], status:'mempool', waitRounds:0, confirmations:0};
+    render();
+  }
+  function speedUp(){
+    if(state.userTx && state.userTx.status==='mempool'){
+      state.userTx.fee += 15;
+      render();
+    }
+  }
+  function reset(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    state.blockNum=0; state.ambient=[]; state.nextId=1; state.userTx=null;
+    spawnAmbient(); spawnAmbient();
+    render();
+  }
+  function setAutoBtn(active){
+    const b = document.getElementById('autoBtn');
+    b.textContent = active ? 'Stop auto-mining' : 'Auto-mine';
+    b.classList.toggle('active', active);
+  }
+
+  document.getElementById('sendBtn').addEventListener('click', sendTx);
+  document.getElementById('mineBtn').addEventListener('click', mineBlock);
+  document.getElementById('autoBtn').addEventListener('click', function(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    else { state.autoTimer = setInterval(mineBlock, 1100); setAutoBtn(true); }
+  });
+  document.getElementById('speedUpBtn').addEventListener('click', speedUp);
+  document.getElementById('resetBtn').addEventListener('click', reset);
+
+  reset();
+})();
+</script>
