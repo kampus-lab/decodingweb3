@@ -1,0 +1,303 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --node-light:#A89A6E;
+    --node-full:#9C7A24;
+    --node-archive:#8C2F39;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,4.2vw,40px);
+    line-height:1.1; margin:0 0 12px; max-width:680px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:600px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:30px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin:0 0 10px; color:var(--ink);}
+  .section p{margin:0 0 12px; font-size:15.5px; color:var(--ink);}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+  .note{
+    margin:14px 0 0; padding:12px 16px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14px; color:var(--ink-soft);
+  }
+
+  .cmp-table{width:100%; border-collapse:collapse; margin:16px 0 0; font-size:14.5px;}
+  .cmp-table th{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--ink-soft); text-align:left; padding:9px 10px; border-bottom:1px solid var(--rule-strong); background:var(--paper-dim);
+  }
+  .cmp-table td{padding:10px 10px; border-bottom:1px dotted var(--rule); vertical-align:top; color:var(--ink);}
+  .cmp-table tr:last-child td{border-bottom:none;}
+
+  /* ---------- Panel (simulator) ---------- */
+  .panel{
+    margin:22px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:20px 18px 22px;
+  }
+  .panel-title{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 14px;}
+  .sim-hint{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 16px;}
+
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.03em; padding:9px 14px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink); border-radius:2px; cursor:pointer;
+  }
+  .btn:hover{background:var(--paper);}
+  .btn.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+
+  .sim-metric-line{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft); margin:0 0 18px;}
+  .sim-metric-line b{color:var(--ink); font-weight:600;}
+
+  .race-row{margin-bottom:14px;}
+  .race-row:last-child{margin-bottom:20px;}
+  .race-row-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; font-family:'IBM Plex Mono',monospace; font-size:12px;}
+  .race-row-head .name{color:var(--ink); font-weight:500;}
+  .race-row-head .val{color:var(--ink-soft);}
+  .race-track{height:14px; background:#fff; border:1px solid var(--rule); border-radius:7px; overflow:hidden;}
+  .race-fill{height:100%; border-radius:7px 0 0 7px; transition:width .3s ease;}
+
+  .query-block{border-top:1px solid var(--rule); padding-top:18px; margin-top:6px;}
+  .query-label{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 8px;}
+  .query-controls{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .query-controls input[type=range]{flex:1 1 200px; accent-color:var(--gold);}
+  .query-controls .out{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink); min-width:80px; text-align:right;}
+  .query-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dotted var(--rule); font-family:'IBM Plex Mono',monospace; font-size:12.5px;}
+  .query-row:last-child{border-bottom:none;}
+  .query-row .name{min-width:110px; font-weight:500; color:var(--ink);}
+  .query-row .mark{width:16px; text-align:center; font-weight:700;}
+  .query-row.yes .mark{color:var(--gold);}
+  .query-row.no .mark{color:var(--ink-soft);}
+  .query-row .reason{color:var(--ink-soft); flex:1;}
+
+  .footer-note{
+    margin:30px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Core Blockchain Mechanics — Topic 10 of 40</p>
+  <h1>Full, Light &amp; Archive Nodes: <em>Who Keeps What, and Why</em></h1>
+  <p>Three answers to the same question — how much of the chain's history are you willing to store, and what will you trust someone else for instead?</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">The trade-off</p>
+    <h2>Storage, trust, and convenience</h2>
+    <p>Every node on the network is answering the same questions the others are, but how much history it stores — and how much it trusts someone else for the rest — is a real design choice with real storage and bandwidth costs attached. Full, archive, and light nodes are three different bets on that trade-off.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Full node</p>
+    <h2>Verifies everything, remembers mostly the present</h2>
+    <p>A full node downloads every block and independently checks every transaction against the consensus rules — nobody has to take anyone's word for it. What it keeps afterward is more selective: it holds the entire block history, but by default it prunes older snapshots of account and contract state, keeping only what the chain looks like right now. Running one costs hundreds of gigabytes of storage, and it is the thing that actually makes the network trustless — anyone can run one and check for themselves.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Archive node</p>
+    <h2>Never forgets a single block</h2>
+    <p>An archive node is a full node that refuses to throw anything away. Alongside the full block history, it keeps the complete state at every single block height, so a query like "what was this address's balance at block 4,000,000" gets an instant, exact answer instead of a shrug. That historical queryability is exactly what block explorers, RPC providers, and analytics platforms are built on — at the cost of multiple terabytes of storage and a much longer initial sync.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Light node</p>
+    <h2>Trusts proofs instead of storing data</h2>
+    <p>A light client does not store the chain or validate transactions at all. It keeps block headers only, and asks a full node for a specific cryptographic proof — "show me that this transaction is really included in this block" — rather than re-executing everything itself. That is how a mobile wallet or browser extension can work from a few kilobytes instead of hundreds of gigabytes. Bitcoin's version of the same idea predates Ethereum's by years, under the name SPV: simplified payment verification.</p>
+    <p class="note"><b>Worth remembering:</b> a light node's security depends entirely on the honesty and availability of whichever full node it's asking — it has opted out of verifying, not just storing.</p>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Simulator — watch the chain grow, and see what each node keeps</p>
+    <p class="sim-hint">Mine a few blocks and watch the three storage totals pull apart. Then drag the slider back to an earlier block and see who can actually answer what the state looked like there.</p>
+
+    <div class="controls">
+      <button id="mineBtn" class="btn">Mine next block</button>
+      <button id="autoBtn" class="btn">Auto-mine</button>
+      <button id="resetBtn" class="btn">Reset</button>
+    </div>
+
+    <p class="sim-metric-line">Chain height: <b id="blockNumOut">0</b> blocks</p>
+
+    <div class="race-row">
+      <div class="race-row-head"><span class="name">Full node</span><span class="val" id="fullVal">0</span></div>
+      <div class="race-track"><div class="race-fill" id="fullFill" style="width:0%;background:var(--node-full);"></div></div>
+    </div>
+    <div class="race-row">
+      <div class="race-row-head"><span class="name">Archive node</span><span class="val" id="archiveVal">0</span></div>
+      <div class="race-track"><div class="race-fill" id="archiveFill" style="width:0%;background:var(--node-archive);"></div></div>
+    </div>
+    <div class="race-row">
+      <div class="race-row-head"><span class="name">Light node</span><span class="val" id="lightVal">0</span></div>
+      <div class="race-track"><div class="race-fill" id="lightFill" style="width:0%;background:var(--node-light);"></div></div>
+    </div>
+
+    <div class="query-block">
+      <p class="query-label">Ask: what did the state look like at a given block?</p>
+      <div class="query-controls">
+        <label for="queryRange" class="sr-only">Block height to query</label>
+        <input type="range" id="queryRange" min="1" max="1" value="1" disabled>
+        <span class="out" id="queryBlockOut">—</span>
+      </div>
+      <div id="queryAnswers"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Why it matters</p>
+    <h2>Who actually runs which one</h2>
+    <table class="cmp-table">
+      <thead>
+        <tr><th>Node type</th><th>Stores</th><th>Validates itself</th><th>Typical storage</th><th>Who runs it</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Full node</td><td>Current state + full block history</td><td>Yes</td><td>Hundreds of GB</td><td>Anyone wanting trustless verification</td></tr>
+        <tr><td>Archive node</td><td>Every historical state, forever</td><td>Yes</td><td>Multiple TB</td><td>Explorers, RPC providers, indexers</td></tr>
+        <tr><td>Light node</td><td>Block headers only</td><td>No — trusts proofs</td><td>KB–MB</td><td>Mobile wallets, browser extensions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="footer-note">Topic 10 of 40 — Core Blockchain Mechanics. Simulator numbers are abstracted demo units for clarity, not real mainnet storage figures.</p>
+</div>
+
+<script>
+(function(){
+  function randJitter(){ return 0.8 + Math.random()*0.4; }
+
+  const HEADER_PER_BLOCK = 1;
+  const BLOCKDATA_PER_BLOCK = 4;
+  const STATE_SNAPSHOT_PER_BLOCK = 6;
+
+  const state = { blockNum:0, full:0, archive:0, light:0, autoTimer:null };
+
+  function mineBlock(){
+    state.blockNum++;
+    state.full += (HEADER_PER_BLOCK + BLOCKDATA_PER_BLOCK) * randJitter();
+    state.archive += (HEADER_PER_BLOCK + BLOCKDATA_PER_BLOCK + STATE_SNAPSHOT_PER_BLOCK) * randJitter();
+    state.light += HEADER_PER_BLOCK * randJitter();
+    render();
+  }
+
+  function renderRace(){
+    const max = Math.max(state.full, state.archive, state.light, 1);
+    document.getElementById('fullVal').textContent = Math.round(state.full);
+    document.getElementById('archiveVal').textContent = Math.round(state.archive);
+    document.getElementById('lightVal').textContent = Math.round(state.light);
+    document.getElementById('fullFill').style.width = (state.full/max*100)+'%';
+    document.getElementById('archiveFill').style.width = (state.archive/max*100)+'%';
+    document.getElementById('lightFill').style.width = (state.light/max*100)+'%';
+    document.getElementById('blockNumOut').textContent = state.blockNum;
+  }
+
+  function renderQueryAnswers(q){
+    const latest = state.blockNum;
+    const box = document.getElementById('queryAnswers');
+    if(latest<1){
+      box.innerHTML = '<p class="sim-hint" style="margin:8px 0 0;">mine a block first</p>';
+      return;
+    }
+    const fullCan = (q===latest);
+    const rows = [
+      {name:'Full node', can:fullCan, reason: fullCan ? 'this is the current state, so it has it' : 'older state was pruned — not stored'},
+      {name:'Archive node', can:true, reason:'kept a snapshot of every block, including this one'},
+      {name:'Light node', can:false, reason:'never stored state — would need a proof from a full node'}
+    ];
+    box.innerHTML = rows.map(r=>
+      '<div class="query-row '+(r.can?'yes':'no')+'">'
+      + '<span class="name">'+r.name+'</span>'
+      + '<span class="mark">'+(r.can?'✓':'✗')+'</span>'
+      + '<span class="reason">'+r.reason+'</span>'
+      + '</div>'
+    ).join('');
+  }
+
+  function updateQueryRange(){
+    const input = document.getElementById('queryRange');
+    const max = Math.max(1, state.blockNum);
+    input.max = max;
+    input.disabled = state.blockNum < 1;
+    if(Number(input.value) > max || Number(input.value) < 1) input.value = max;
+    document.getElementById('queryBlockOut').textContent = state.blockNum < 1 ? '—' : ('block '+input.value);
+    renderQueryAnswers(Number(input.value));
+  }
+
+  function render(){
+    renderRace();
+    updateQueryRange();
+  }
+
+  function reset(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    state.blockNum=0; state.full=0; state.archive=0; state.light=0;
+    render();
+  }
+  function setAutoBtn(active){
+    const b = document.getElementById('autoBtn');
+    b.textContent = active ? 'Stop auto-mining' : 'Auto-mine';
+    b.classList.toggle('active', active);
+  }
+
+  document.getElementById('mineBtn').addEventListener('click', mineBlock);
+  document.getElementById('autoBtn').addEventListener('click', function(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    else { state.autoTimer = setInterval(mineBlock, 1100); setAutoBtn(true); }
+  });
+  document.getElementById('resetBtn').addEventListener('click', reset);
+  document.getElementById('queryRange').addEventListener('input', function(){
+    document.getElementById('queryBlockOut').textContent = 'block '+this.value;
+    renderQueryAnswers(Number(this.value));
+  });
+
+  reset();
+})();
+</script>
