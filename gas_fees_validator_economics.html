@@ -1,0 +1,430 @@
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Newsreader:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1ECDD;
+    --paper-dim:#E8E1CC;
+    --cover:#1F2A38;
+    --cover-soft:#2C3A4D;
+    --ink:#2B2418;
+    --ink-soft:#5B5240;
+    --rule:#C7BC9C;
+    --rule-strong:#A89A6E;
+    --gold:#9C7A24;
+    --gas-normal:#2F5D6B;
+    --gas-mev:#8C2F39;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Newsreader', Georgia, serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 0 70px;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:linear-gradient(180deg,var(--cover),var(--cover-soft));
+    color:var(--paper);
+    padding:38px 32px 28px;
+    border-bottom:6px double var(--gold);
+    position:relative; overflow:hidden;
+  }
+  .cover::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(transparent 0 27px, rgba(241,236,221,0.035) 27px 28px);
+    pointer-events:none;
+  }
+  .cover-eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:#C9B978; margin:0 0 10px;
+  }
+  .cover h1{
+    font-family:'Fraunces',serif; font-weight:700; font-size:clamp(24px,4.2vw,40px);
+    line-height:1.1; margin:0 0 12px; max-width:680px;
+  }
+  .cover h1 em{font-style:italic;font-weight:500;color:#D9CB94;}
+  .cover p{max-width:600px; color:#D8D2BE; margin:0; font-size:15px;}
+
+  /* ---------- Prose ---------- */
+  .section{margin:30px 32px 0;}
+  .section h2{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin:0 0 10px; color:var(--ink);}
+  .section p{margin:0 0 12px; font-size:15.5px; color:var(--ink);}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 6px;
+  }
+  .note{
+    margin:14px 0 0; padding:12px 16px; border-left:3px solid var(--gold);
+    background:var(--paper-dim); font-size:14px; color:var(--ink-soft);
+  }
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0 0;}
+  @media(max-width:560px){ .two-col{grid-template-columns:1fr;} }
+  .two-col h4{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 6px;}
+  .two-col ul{margin:0; padding-left:17px; font-size:13.5px;}
+  .two-col li{margin-bottom:5px;}
+  .flow-steps{margin:16px 0 0; display:flex; flex-wrap:wrap; gap:0; align-items:center;}
+  .flow-steps .step{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:var(--paper-dim);
+    border:1px solid var(--rule); border-radius:4px; padding:9px 13px; color:var(--ink);
+  }
+  .flow-steps .arrow{font-family:'IBM Plex Mono',monospace; color:var(--gold); padding:0 8px; font-size:14px;}
+  .income-list{margin:14px 0 0; padding:0; list-style:none;}
+  .income-list li{border-bottom:1px dotted var(--rule); padding:11px 0;}
+  .income-list li:last-child{border-bottom:none;}
+  .income-list b{font-family:'Fraunces',serif; font-weight:600; font-size:15px;}
+  .income-list span{display:block; font-size:14px; color:var(--ink-soft); margin-top:2px;}
+
+  /* ---------- Panel (simulator) ---------- */
+  .panel{
+    margin:22px 24px 0; border:1px solid var(--rule); background:var(--paper-dim);
+    border-radius:6px; padding:20px 18px 22px;
+  }
+  .panel-title{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin:0 0 14px;}
+  .sim-hint{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 16px;}
+
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:18px;}
+  .controls select{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:9px 11px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink); border-radius:2px;
+  }
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.03em; padding:9px 14px;
+    border:1px solid var(--rule-strong); background:#fff; color:var(--ink); border-radius:2px; cursor:pointer;
+  }
+  .btn:hover{background:var(--paper);}
+  .btn.active{background:var(--cover); color:var(--paper); border-color:var(--cover);}
+  .mev-label{display:flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft);}
+  .mev-cb{accent-color:var(--gold); cursor:pointer; width:15px; height:15px;}
+
+  .sim-metrics{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:20px;}
+  .sim-metric{background:#fff; border:1px solid var(--rule); border-radius:4px; padding:11px 13px;}
+  .sim-metric .lbl{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 5px;}
+  .sim-metric .val{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0; color:var(--ink);}
+
+  .sim-block-label{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 6px;}
+  .sim-block-wrap{position:relative; margin-bottom:6px;}
+  .sim-block{height:38px; border:1px solid var(--rule); border-radius:4px; background:#fff; overflow:hidden; display:flex;}
+  .sim-target-line{position:absolute; left:50%; top:0; bottom:0; width:0; border-left:1.5px dashed var(--gold); pointer-events:none;}
+  .sim-target-label{position:absolute; left:50%; top:-16px; transform:translateX(-50%); font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--gold); white-space:nowrap;}
+  .sim-legend{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin:14px 0 18px;}
+  .sim-legend span{display:inline-flex; align-items:center; gap:5px; margin-right:14px;}
+  .sim-legend i{display:inline-block; width:10px; height:10px; border-radius:2px;}
+
+  .sim-mempool-title{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:0 0 8px;}
+  .sim-row{display:flex; align-items:center; gap:12px; padding:7px 10px; border-bottom:1px dotted var(--rule); font-family:'IBM Plex Mono',monospace; font-size:12px;}
+  .sim-row:last-child{border-bottom:none;}
+  .sim-row .name{min-width:130px; font-weight:500; color:var(--ink);}
+  .sim-row .stat{color:var(--ink-soft);}
+  .sim-row.ineligible{opacity:.6;}
+  .sim-divider{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); padding:8px 10px 4px; text-transform:uppercase; letter-spacing:.05em;}
+  .sim-more{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); padding:6px 10px 0;}
+
+  .sim-trend-title{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); margin:22px 0 8px;}
+  .sim-trend{position:relative; height:70px; display:flex; align-items:flex-end; gap:3px; border-bottom:1px solid var(--rule); padding-bottom:2px;}
+  .trend-bar{flex:1 1 auto; min-width:3px; border-radius:1px 1px 0 0;}
+  .sim-trend-row{margin-bottom:16px;}
+  .sim-trend-key{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); margin:0 0 4px;}
+
+  .footer-note{
+    margin:30px 32px 0; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--rule); padding-top:14px;
+  }
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+
+<div class="cover">
+  <p class="cover-eyebrow">Core Blockchain Mechanics — Topic 09 of 40</p>
+  <h1>Gas, Fees &amp; Validator Economics: <em>The Market for Block Space</em></h1>
+  <p>Every block is a scarce resource with a price that sets itself. Watch the auction run live, then see where validators — and the bots circling them — actually make their money.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <p class="kicker">Why fees exist</p>
+    <h2>Block space is scarce, fees decide who fits</h2>
+    <p>Every block has a hard ceiling on how much computation it can hold, measured in gas — a simple transfer costs a little, a complex contract call costs a lot. Demand to fill that space keeps moving, so the network needs a way to decide who gets in when more people want a seat than there are seats. That mechanism is the fee market, and it has been built two very different ways.</p>
+    <p class="note"><b>Gas vs. fee:</b> gas is the unit of work a transaction does. The fee is gas used × price per unit of gas — the price is the part that actually moves.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Two ways to price it</p>
+    <h2>First-price auctions vs. base fee + tip</h2>
+    <p>The original model is a pure first-price auction: everyone attaches a fee bid, and whoever builds the next block takes the highest bidders first. You are guessing what everyone else is bidding, which causes overpayment during congestion and stuck transactions during quiet periods.</p>
+    <p>The modern model — EIP-1559 on Ethereum, and similar designs elsewhere — splits the fee into an algorithmic <b>base fee</b> that adjusts every block based on how full the previous one was, plus an optional <b>tip</b> paid directly to the validator. The base fee is burned, not paid to anyone, so you set a maximum and get refunded the difference instead of guessing a single number.</p>
+    <div class="two-col">
+      <div>
+        <h4>Legacy auction</h4>
+        <ul>
+          <li>Simple, no extra infrastructure</li>
+          <li>No reliable signal for the going rate</li>
+          <li>Overpaying and stuck transactions are common</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Base fee + tip</h4>
+        <ul>
+          <li>Price adjusts itself, block by block</li>
+          <li>Refunds the gap between your max and the real fee</li>
+          <li>Tips still spike during genuine demand shocks</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Simulator — run the fee market yourself</p>
+    <p class="sim-hint">Mine a few blocks under normal demand, then switch to high demand and watch the base fee climb. Turn on MEV bots and watch what rides in around a large transaction.</p>
+
+    <div class="controls">
+      <label for="demandSelect" class="sr-only">Demand level</label>
+      <select id="demandSelect">
+        <option value="low">Low demand</option>
+        <option value="normal" selected>Normal demand</option>
+        <option value="high">High demand</option>
+      </select>
+      <button id="mineBtn" class="btn">Mine next block</button>
+      <button id="autoBtn" class="btn">Auto-mine</button>
+      <label class="mev-label"><input type="checkbox" id="mevToggle" class="mev-cb">Simulate MEV bots</label>
+      <button id="resetBtn" class="btn">Reset</button>
+    </div>
+
+    <div class="sim-metrics">
+      <div class="sim-metric"><p class="lbl">Base fee</p><p class="val" id="baseFeeOut">20</p></div>
+      <div class="sim-metric"><p class="lbl">Last block fullness</p><p class="val" id="fullnessOut">0%</p></div>
+      <div class="sim-metric"><p class="lbl">Total burned</p><p class="val" id="burnedOut">0</p></div>
+      <div class="sim-metric"><p class="lbl">MEV extracted</p><p class="val" id="mevOut">0</p></div>
+    </div>
+
+    <p class="sim-block-label">Block <span id="blockNumOut">0</span> — gas used <span id="gasUsedOut">0</span> / 30 (target 15)</p>
+    <div class="sim-block-wrap">
+      <div class="sim-block" id="blockBar"></div>
+      <div class="sim-target-line"></div>
+      <span class="sim-target-label">target 50%</span>
+    </div>
+    <p class="sim-legend">
+      <span><i style="background:var(--gas-normal);"></i>regular transactions</span>
+      <span><i style="background:var(--gas-mev);"></i>MEV bot transactions</span>
+      <span><i style="background:var(--rule);"></i>below current base fee</span>
+    </p>
+
+    <p class="sim-mempool-title">Mempool — <span id="mempoolCountOut">0</span> pending</p>
+    <div id="mempoolList"></div>
+
+    <p class="sim-trend-title">Recent blocks</p>
+    <div class="sim-trend-row">
+      <p class="sim-trend-key">Base fee</p>
+      <div class="sim-trend" id="trendBaseFee"></div>
+    </div>
+    <div class="sim-trend-row">
+      <p class="sim-trend-key">Block fullness % (dashed line = target)</p>
+      <div class="sim-trend" id="trendFullness"><div class="sim-target-line" style="left:0; top:auto; bottom:45%; right:0; width:auto; border-left:none; border-top:1.5px dashed var(--gold);"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Where MEV comes in</p>
+    <h2>Order itself is worth money</h2>
+    <p>Fees are not the only thing on the table — who goes first inside a block can be worth money on its own. This is maximal extractable value, or MEV. The classic case is a sandwich: a bot sees your large swap sitting in the mempool, buys just ahead of you to push the price up, lets your trade execute at the worse price, then sells right after at the price your own trade helped create.</p>
+  </div>
+
+  <div class="section">
+    <p class="kicker">The modern pipeline</p>
+    <h2>Searchers, builders, proposers</h2>
+    <p>Early on, bots fought for ordering by re-bidding gas prices against each other in public, which spiked fees for everyone, not just the bots. That pushed Ethereum toward proposer-builder separation:</p>
+    <div class="flow-steps">
+      <span class="step">Your transaction</span><span class="arrow">→</span>
+      <span class="step">Searchers spot MEV, build bundles</span><span class="arrow">→</span>
+      <span class="step">Builders assemble full blocks</span><span class="arrow">→</span>
+      <span class="step">Proposer picks the highest-paying block</span><span class="arrow">→</span>
+      <span class="step">Block is final</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="kicker">Validator economics</p>
+    <h2>Three layers of income</h2>
+    <ul class="income-list">
+      <li><b>Protocol issuance</b><span>Newly issued tokens for proposing and attesting blocks correctly.</span></li>
+      <li><b>Priority tips</b><span>The portion of fees users attach for faster inclusion.</span></li>
+      <li><b>MEV payments</b><span>What builders pay proposers for the right to have their block included, via proposer-builder separation.</span></li>
+    </ul>
+    <p class="note">Proof-of-work miners earn a block subsidy plus fees too, but carry real electricity and hardware costs — a different cost structure from proof-of-stake validators.</p>
+  </div>
+
+  <p class="footer-note">Topic 09 of 40 — Core Blockchain Mechanics. Simulator numbers are abstracted demo units for clarity, not real mainnet gas prices.</p>
+</div>
+
+<script>
+(function(){
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  const state = {
+    baseFee:20, maxGas:30, targetGas:15, mempool:[], blockNum:0,
+    totalBurned:0, totalTips:0, mevExtracted:0, lastBlockGasUsed:0, lastBlockTx:[],
+    history:{baseFee:[], fullness:[]}, autoTimer:null, nextId:1
+  };
+
+  function demandParams(){
+    const v = document.getElementById('demandSelect').value;
+    if(v==='low') return {count:[1,3], feeBias:[-6,4], tipRange:[1,3]};
+    if(v==='high') return {count:[6,10], feeBias:[8,32], tipRange:[3,12]};
+    return {count:[3,6], feeBias:[-2,14], tipRange:[1,6]};
+  }
+  function makeTx(){
+    const p = demandParams();
+    const gas = randInt(2,8);
+    const maxFee = Math.max(1, Math.round(state.baseFee + randInt(p.feeBias[0], p.feeBias[1])));
+    const tip = randInt(p.tipRange[0], p.tipRange[1]);
+    return {id: state.nextId++, gas, maxFee, tip, type:'normal'};
+  }
+  function arriveTransactions(){
+    const p = demandParams();
+    const n = randInt(p.count[0], p.count[1]);
+    const mevOn = document.getElementById('mevToggle').checked;
+    for(let i=0;i<n;i++){
+      const tx = makeTx();
+      state.mempool.push(tx);
+      if(mevOn && tx.gas>=6 && Math.random()<0.5){
+        tx.type='victim';
+        const bundleId='b'+tx.id;
+        tx.bundleId=bundleId;
+        state.mempool.push({id:state.nextId++, gas:randInt(2,3), maxFee:tx.maxFee+randInt(5,15), tip:tx.tip+randInt(2,4), type:'mev', bundleId});
+        state.mempool.push({id:state.nextId++, gas:randInt(2,3), maxFee:tx.maxFee+randInt(5,15), tip:tx.tip+randInt(1,3), type:'mev', bundleId});
+      }
+    }
+    if(state.mempool.length>40){
+      state.mempool.sort((a,b)=>b.tip-a.tip);
+      state.mempool = state.mempool.slice(0,40);
+    }
+  }
+  function txLabel(t){
+    if(t.type==='mev') return 'MEV bot #'+t.id;
+    if(t.type==='victim') return 'Tx #'+t.id+' (victim)';
+    return 'Tx #'+t.id;
+  }
+  function rowHtml(t, eligible){
+    const color = !eligible ? 'var(--ink-soft)' : (t.type==='mev' ? 'var(--gas-mev)' : 'var(--gas-normal)');
+    return '<div class="sim-row'+(eligible?'':' ineligible')+'">'
+      + '<span class="name" style="color:'+color+';">'+txLabel(t)+'</span>'
+      + '<span class="stat">gas '+t.gas+'</span>'
+      + '<span class="stat">max '+Math.round(t.maxFee)+'</span>'
+      + '<span class="stat">tip '+Math.round(t.tip)+'</span>'
+      + '</div>';
+  }
+  function renderMempool(){
+    const eligible = state.mempool.filter(t=>t.maxFee>=state.baseFee).sort((a,b)=>b.tip-a.tip);
+    const ineligible = state.mempool.filter(t=>t.maxFee<state.baseFee).sort((a,b)=>b.maxFee-a.maxFee);
+    let html='';
+    const showElig = eligible.slice(0,6);
+    const showInelig = ineligible.slice(0,4);
+    showElig.forEach(t=>html+=rowHtml(t,true));
+    if(eligible.length>6) html+='<p class="sim-more">+'+(eligible.length-6)+' more eligible, waiting</p>';
+    if(showInelig.length){
+      html+='<p class="sim-divider">below current base fee, not yet eligible</p>';
+      showInelig.forEach(t=>html+=rowHtml(t,false));
+      if(ineligible.length>4) html+='<p class="sim-more">+'+(ineligible.length-4)+' more stuck below base fee</p>';
+    }
+    if(!eligible.length && !ineligible.length) html = '<p class="sim-more">mempool empty</p>';
+    document.getElementById('mempoolList').innerHTML = html;
+    document.getElementById('mempoolCountOut').textContent = state.mempool.length;
+  }
+  function renderBlockBar(){
+    const bar = document.getElementById('blockBar');
+    let html='';
+    state.lastBlockTx.forEach(t=>{
+      const color = t.type==='mev' ? 'var(--gas-mev)' : 'var(--gas-normal)';
+      const widthPct = (t.gas/state.maxGas*100);
+      html += '<div title="'+txLabel(t)+'" style="width:'+widthPct+'%;height:100%;background:'+color+';border-right:1px solid var(--paper-dim);"></div>';
+    });
+    bar.innerHTML = html;
+    document.getElementById('blockNumOut').textContent = state.blockNum;
+    document.getElementById('gasUsedOut').textContent = Math.round(state.lastBlockGasUsed);
+  }
+  function renderMetrics(){
+    document.getElementById('baseFeeOut').textContent = Math.round(state.baseFee*10)/10;
+    const fullness = state.lastBlockGasUsed ? Math.round(state.lastBlockGasUsed/state.targetGas*100) : 0;
+    document.getElementById('fullnessOut').textContent = fullness+'%';
+    document.getElementById('burnedOut').textContent = Math.round(state.totalBurned).toLocaleString();
+    document.getElementById('mevOut').textContent = Math.round(state.mevExtracted).toLocaleString();
+  }
+  function renderTrend(){
+    const bf = state.history.baseFee, fl = state.history.fullness;
+    const maxBF = Math.max(10, state.baseFee, ...(bf.length?bf:[10]));
+    const bfHtml = bf.map(v=>'<div class="trend-bar" style="height:'+Math.max(4,(v/maxBF*100))+'%;background:var(--gold);" title="base fee '+v+'"></div>').join('');
+    document.getElementById('trendBaseFee').innerHTML = bfHtml || '<p class="sim-more" style="position:absolute;bottom:0;">no blocks mined yet</p>';
+    const flWrap = document.getElementById('trendFullness');
+    const target = flWrap.querySelector('.sim-target-line');
+    const flHtml = fl.map(v=>'<div class="trend-bar" style="height:'+Math.max(4,Math.min(100,(v/220*100)))+'%;background:var(--gas-normal);" title="fullness '+v+'%"></div>').join('');
+    flWrap.innerHTML = flHtml;
+    flWrap.appendChild(target);
+    if(!fl.length){ flWrap.innerHTML = '<p class="sim-more" style="position:absolute;bottom:0;">no blocks mined yet</p>'; flWrap.appendChild(target); }
+  }
+  function render(){
+    renderBlockBar();
+    renderMempool();
+    renderMetrics();
+    renderTrend();
+  }
+  function mineBlock(){
+    arriveTransactions();
+    const pool = state.mempool.filter(t=>t.maxFee>=state.baseFee).sort((a,b)=>b.tip-a.tip);
+    let used=0; const included=[];
+    for(const t of pool){ if(used+t.gas<=state.maxGas){ included.push(t); used+=t.gas; } }
+    const includedIds = new Set(included.map(t=>t.id));
+    state.mempool = state.mempool.filter(t=>!includedIds.has(t.id));
+    const baseFeeUsed = state.baseFee;
+    state.totalBurned += used*baseFeeUsed;
+    state.totalTips += included.reduce((s,t)=>s+t.tip,0);
+    const bundleGroups={};
+    included.forEach(t=>{ if(t.bundleId){ (bundleGroups[t.bundleId]=bundleGroups[t.bundleId]||[]).push(t); } });
+    Object.values(bundleGroups).forEach(g=>{
+      if(g.length===3){
+        const victim=g.find(t=>t.type==='victim');
+        const extracted = g.filter(t=>t.type==='mev').reduce((s,t)=>s+t.tip,0) - (victim?victim.tip:0);
+        state.mevExtracted += Math.max(0, extracted);
+      }
+    });
+    state.lastBlockGasUsed = used;
+    state.lastBlockTx = included;
+    const delta = state.baseFee*(used-state.targetGas)/state.targetGas/8;
+    state.baseFee = Math.max(1, state.baseFee+delta);
+    state.blockNum++;
+    state.history.baseFee.push(Math.round(state.baseFee*10)/10);
+    state.history.fullness.push(Math.round(used/state.targetGas*100));
+    if(state.history.baseFee.length>20){ state.history.baseFee.shift(); state.history.fullness.shift(); }
+    render();
+  }
+  function reset(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    state.baseFee=20; state.mempool=[]; state.blockNum=0; state.totalBurned=0; state.totalTips=0;
+    state.mevExtracted=0; state.lastBlockGasUsed=0; state.lastBlockTx=[];
+    state.history={baseFee:[], fullness:[]}; state.nextId=1;
+    arriveTransactions(); arriveTransactions();
+    render();
+  }
+  function setAutoBtn(active){
+    const b = document.getElementById('autoBtn');
+    b.textContent = active ? 'Stop auto-mining' : 'Auto-mine';
+    b.classList.toggle('active', active);
+  }
+
+  document.getElementById('mineBtn').addEventListener('click', mineBlock);
+  document.getElementById('autoBtn').addEventListener('click', function(){
+    if(state.autoTimer){ clearInterval(state.autoTimer); state.autoTimer=null; setAutoBtn(false); }
+    else { state.autoTimer = setInterval(mineBlock, 1100); setAutoBtn(true); }
+  });
+  document.getElementById('resetBtn').addEventListener('click', reset);
+
+  reset();
+})();
+</script>
