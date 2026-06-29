@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Token Creation Works on Ethereum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#15131F;
+    --surface:#1E1A2E;
+    --surface-2:#262138;
+    --line:rgba(237,234,245,0.10);
+    --text:#EDEAF5;
+    --dim:#9089AC;
+    --dimmer:#6F6789;
+    --amber:#F2A65A;
+    --amber-dim:rgba(242,166,90,0.14);
+    --cyan:#5FD9C9;
+    --cyan-dim:rgba(95,217,201,0.14);
+    --red:#E2685A;
+    --red-dim:rgba(226,104,90,0.14);
+    --max:1140px;
+    --display:'Space Grotesk', sans-serif;
+    --sans:'IBM Plex Sans', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+    font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber); color:#1A1525;}
+  :focus-visible{outline:2px solid var(--cyan); outline-offset:3px; border-radius:2px;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+  h1,h2,h3,h4{font-family:var(--display); font-weight:600; margin:0; letter-spacing:-0.01em; color:var(--text);}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--cyan);
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--cyan);}
+  .lede{font-size:1.1rem; color:var(--dim); max-width:600px; margin-top:16px;}
+  section{padding:90px 0;}
+  section.dim{background:var(--surface);}
+  .section-head{max-width:680px; margin-bottom:46px;}
+  .section-head h2{font-size:clamp(1.6rem,3vw,2.2rem); line-height:1.18;}
+  hr.rule{border:0; border-top:1px solid var(--line);}
+
+  /* nav */
+  nav.topnav{position:sticky; top:0; z-index:50; background:rgba(21,19,31,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line);}
+  .nav-inner{max-width:var(--max); margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  .wordmark{font-family:var(--mono); font-size:13.5px; color:var(--text); display:flex; align-items:center; gap:8px;}
+  .wordmark .dot{width:8px; height:8px; border-radius:50%; background:var(--amber); box-shadow:0 0 0 3px var(--amber-dim);}
+  .nav-links{display:flex; gap:20px; list-style:none; margin:0; padding:0; overflow-x:auto; scrollbar-width:none;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .nav-links a{font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--dim); text-decoration:none; white-space:nowrap; transition:color .15s;}
+  .nav-links a:hover{color:var(--cyan);}
+
+  /* hero */
+  .hero{padding:76px 0 60px; position:relative;}
+  .hero::before{
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    background:radial-gradient(circle at 14% 0%, rgba(242,166,90,0.10), transparent 50%),
+               radial-gradient(circle at 90% 30%, rgba(95,217,201,0.10), transparent 50%);
+  }
+  .hero h1{font-size:clamp(2.1rem,4.4vw,3.1rem); line-height:1.12; max-width:760px;}
+  .hero h1 .hl{color:var(--amber);}
+
+  /* terminal / simulator */
+  .terminal{
+    margin-top:44px; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    display:grid; grid-template-columns:1.1fr 0.9fr;
+  }
+  .term-bar{
+    grid-column:1 / -1; display:flex; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--line); background:var(--surface-2);
+  }
+  .term-dot{width:9px; height:9px; border-radius:50%;}
+  .term-dot.r{background:#E2685A;} .term-dot.y{background:#F2A65A;} .term-dot.g{background:#5FD9C9;}
+  .term-title{margin-left:8px; font-family:var(--mono); font-size:12px; color:var(--dim);}
+  .term-code{padding:20px 18px; font-family:var(--mono); font-size:13px; line-height:1.85; border-right:1px solid var(--line);}
+  .code-line{display:flex; gap:14px; border-radius:4px; padding:1px 6px; transition:background .25s;}
+  .code-line .ln{color:var(--dimmer); width:14px; flex:none; text-align:right;}
+  .code-line .code{color:var(--dim); white-space:pre;}
+  .code-line.kw{color:var(--cyan);}
+  .code-line.active{background:var(--cyan-dim);}
+  .code-line.active .code{color:var(--text);}
+  .code-line.error-flash{background:var(--red-dim) !important;}
+  .code-line.error-flash .code{color:var(--red) !important;}
+  .term-side{padding:20px 18px; display:flex; flex-direction:column; gap:16px;}
+  .mode-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .mode-label{font-family:var(--mono); font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--dim);}
+  .switch{width:42px; height:24px; border-radius:14px; background:var(--surface-2); position:relative; flex:none; cursor:pointer; border:1px solid var(--line);}
+  .switch::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--dim); transition:transform .2s, background .2s;}
+  .switch[aria-pressed="true"]{background:var(--amber-dim); border-color:var(--amber);}
+  .switch[aria-pressed="true"]::after{transform:translateX(18px); background:var(--amber);}
+  .supply-readout{font-family:var(--mono);}
+  .supply-readout .big{font-size:1.9rem; color:var(--text); font-weight:600;}
+  .supply-readout .cap{font-size:12.5px; color:var(--dim);}
+  .gauge{height:8px; border-radius:6px; background:var(--surface-2); overflow:hidden; border:1px solid var(--line); position:relative;}
+  .gauge-fill{height:100%; background:linear-gradient(90deg, var(--cyan), var(--amber)); width:0%; transition:width .3s ease;}
+  .gauge-cap-mark{position:absolute; top:-4px; right:0; width:2px; height:16px; background:var(--red); display:none;}
+  .term-buttons{display:flex; gap:10px; margin-top:auto;}
+  .btn{
+    font-family:var(--mono); font-size:12.5px; padding:10px 16px; border-radius:7px; border:1px solid var(--line);
+    background:var(--surface-2); color:var(--text); cursor:pointer; transition:all .15s;
+  }
+  .btn:hover{border-color:var(--cyan); color:var(--cyan);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.reset{background:none; color:var(--dim);}
+  .term-log{font-family:var(--mono); font-size:11.5px; color:var(--dim); min-height:18px;}
+  .term-log .ok{color:var(--cyan);}
+  .term-log .fail{color:var(--red);}
+
+  /* who-creates cards */
+  .card-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .who-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px;}
+  .who-card .tag{font-family:var(--mono); font-size:11px; color:var(--amber); text-transform:uppercase; letter-spacing:0.08em;}
+  .who-card h4{font-size:1.02rem; margin:10px 0 8px;}
+  .who-card p{font-size:0.88rem; color:var(--dim); margin:0;}
+
+  /* deploy flow */
+  .flow{display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative;}
+  .flow-step{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; position:relative;
+  }
+  .flow-step + .flow-step{margin-left:18px;}
+  .flow-step .fnum{font-family:var(--mono); font-size:11px; color:var(--cyan); margin-bottom:10px; display:block;}
+  .flow-step h4{font-size:0.98rem; margin-bottom:8px;}
+  .flow-step p{font-size:0.86rem; color:var(--dim); margin:0;}
+  .flow-step .gas{
+    display:inline-block; margin-top:10px; font-family:var(--mono); font-size:10.5px; color:var(--amber);
+    background:var(--amber-dim); padding:3px 8px; border-radius:20px;
+  }
+  .flow-arrow{position:absolute; right:-26px; top:50%; transform:translateY(-50%); color:var(--dimmer); font-size:18px; display:none;}
+
+  /* standards */
+  .std-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .std-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px;}
+  .std-card .code-name{font-family:var(--mono); color:var(--cyan); font-size:0.85rem;}
+  .std-card h4{font-size:1.1rem; margin:8px 0 12px;}
+  .std-card p{font-size:0.9rem; color:var(--dim); margin:0 0 12px;}
+  .std-card .ex{font-family:var(--mono); font-size:11.5px; color:var(--amber);}
+
+  /* cap patterns */
+  .pattern-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .pattern-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:14px;}
+  .pattern-card h4{font-size:1.05rem;}
+  .pattern-card p{font-size:0.89rem; color:var(--dim); margin:0;}
+  .pattern-viz{height:54px; border-radius:8px; background:var(--surface-2); position:relative; overflow:hidden; border:1px solid var(--line);}
+  .pattern-viz .bar{position:absolute; left:0; bottom:0; width:100%; background:linear-gradient(90deg,var(--cyan),var(--amber));}
+  .pattern-viz .fixed-bar{height:78%;}
+  .pattern-viz .fixed-cap-line{position:absolute; top:6px; left:0; right:0; border-top:2px dashed var(--red); }
+  .pattern-viz .open-dots{position:absolute; inset:0; display:flex; align-items:center; gap:6px; padding-left:10px; animation:driftdots 5s linear infinite;}
+  .pattern-viz .open-dots span{width:8px; height:8px; border-radius:50%; background:var(--cyan); flex:none;}
+  @keyframes driftdots{ from{transform:translateX(0);} to{transform:translateX(-40px);} }
+  .pattern-viz .pegged-mark{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:4px;}
+  .pattern-viz .pegged-mark span{font-family:var(--mono); font-size:11px; color:var(--dim);}
+  .pattern-tag{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em; color:var(--cyan);}
+
+  /* big stat / ceiling */
+  .ceiling{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;}
+  .ceiling-stat{font-family:var(--mono); font-size:clamp(1.6rem,3.4vw,2.5rem); color:var(--amber); line-height:1.3; word-break:break-word;}
+  .ceiling-stat small{display:block; font-size:0.85rem; color:var(--dim); margin-top:10px; font-family:var(--sans);}
+
+  /* gas */
+  .gas-row{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .gas-card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px;}
+  .gas-card h4{font-size:1rem; margin-bottom:8px;}
+  .gas-card p{font-size:0.88rem; color:var(--dim); margin:0;}
+
+  footer{padding:48px 0 36px; border-top:1px solid var(--line); font-size:0.85rem; color:var(--dimmer);}
+  footer .wrap{display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:flex-end;}
+  footer strong{color:var(--text); font-family:var(--display);}
+  footer .disclaimer{max-width:480px; line-height:1.6;}
+
+  .reveal{opacity:0; transform:translateY(14px); transition:opacity .55s ease, transform .55s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  @media (max-width:980px){
+    .terminal{grid-template-columns:1fr;}
+    .term-code{border-right:none; border-bottom:1px solid var(--line);}
+    .card-grid, .std-grid, .pattern-grid, .gas-row{grid-template-columns:1fr 1fr;}
+    .flow{grid-template-columns:1fr;}
+    .flow-step + .flow-step{margin-left:0; margin-top:18px;}
+    .ceiling{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .card-grid, .std-grid, .pattern-grid, .gas-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <span class="wordmark"><span class="dot"></span>mint.eth</span>
+    <ul class="nav-links">
+      <li><a href="#sim">The Simulator</a></li>
+      <li><a href="#who">Who Creates Tokens</a></li>
+      <li><a href="#deploy">Deploying a Token</a></li>
+      <li><a href="#standards">Standards</a></li>
+      <li><a href="#caps">Hard Caps?</a></li>
+      <li><a href="#gas">Gas</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="sim">
+  <div class="wrap">
+    <div class="eyebrow">How Ethereum actually works</div>
+    <h1>There's no token printer. There's only <span class="hl">code</span> that says how many to make.</h1>
+    <p class="lede">Ethereum doesn't decide how many units of a token can exist, who's allowed to create one, or whether there's a ceiling. Every one of those rules is written into a smart contract by whoever deploys it. Flip the switch below to see the difference a single line of code makes.</p>
+
+    <div class="terminal reveal">
+      <div class="term-bar">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-title" id="termTitle">Token.sol — mint() function</span>
+      </div>
+      <div class="term-code" id="termCode"></div>
+      <div class="term-side">
+        <div class="mode-row">
+          <span class="mode-label" id="modeLabel">Hard-capped contract</span>
+          <button class="switch" id="capSwitch" aria-pressed="true" aria-label="Toggle between capped and uncapped contract"></button>
+        </div>
+        <div class="supply-readout">
+          <span class="big" id="supplyBig">0</span> <span class="cap" id="supplyCap">/ 12 minted</span>
+          <div class="gauge" style="margin-top:10px;">
+            <div class="gauge-fill" id="gaugeFill"></div>
+            <div class="gauge-cap-mark" id="gaugeCapMark"></div>
+          </div>
+        </div>
+        <div class="term-log" id="termLog">Ready. Click "Mint +1" to call the function.</div>
+        <div class="term-buttons">
+          <button class="btn" id="mintBtn">Mint +1</button>
+          <button class="btn reset" id="resetBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="who">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">No gatekeeper</div>
+      <h2>Anyone can deploy a contract — that's the point</h2>
+      <p class="lede" style="margin-top:10px;">Ethereum is permissionless: there's no company or committee that approves a new token. In practice, four kinds of people end up doing it.</p>
+    </div>
+    <div class="card-grid reveal">
+      <div class="who-card">
+        <span class="tag">Solo</span>
+        <h4>Individual developers</h4>
+        <p>Anyone who can write and deploy a smart contract can mint a token — there's no licence required, just code and a bit of ETH for gas.</p>
+      </div>
+      <div class="who-card">
+        <span class="tag">Startups</span>
+        <h4>Projects launching a token</h4>
+        <p>New apps and protocols often issue their own currency, governance token, or in-app point system as part of launching their product.</p>
+      </div>
+      <div class="who-card">
+        <span class="tag">Platforms</span>
+        <h4>Issuers &amp; tokenization platforms</h4>
+        <p>Companies that tokenize a real-world asset — a fund, a building, a painting — deploy the contract on the issuer's behalf and manage it afterward.</p>
+      </div>
+      <div class="who-card">
+        <span class="tag">Protocols</span>
+        <h4>DAOs &amp; automated contracts</h4>
+        <p>Some tokens are minted automatically by other contracts — like a lending protocol issuing a receipt token the moment you deposit collateral.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="deploy" class="dim">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">The rulebook is code</div>
+      <h2>From idea to live token, in four steps</h2>
+      <p class="lede" style="margin-top:10px;">A "smart contract" is just code that runs automatically once deployed — nobody can quietly edit the rules afterward.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-step">
+        <span class="fnum">01</span>
+        <h4>Write the contract</h4>
+        <p>The developer decides the rules: how many tokens can exist, who can mint, whether supply is capped.</p>
+      </div>
+      <div class="flow-step">
+        <span class="fnum">02</span>
+        <h4>Deploy it</h4>
+        <p>The contract is published to Ethereum as a public, unchangeable transaction anyone can inspect.</p>
+        <span class="gas">⛽ costs gas</span>
+      </div>
+      <div class="flow-step">
+        <span class="fnum">03</span>
+        <h4>Call mint()</h4>
+        <p>Calling the contract's mint function actually creates token units and sends them to a wallet address.</p>
+        <span class="gas">⛽ costs gas</span>
+      </div>
+      <div class="flow-step">
+        <span class="fnum">04</span>
+        <h4>It's live</h4>
+        <p>The token now exists on-chain. It can be held, transferred, or traded by anyone with a wallet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="standards">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Pick a shape, not just a number</div>
+      <h2>Three standards cover almost every token</h2>
+      <p class="lede" style="margin-top:10px;">The standard a developer picks decides whether units are identical or unique.</p>
+    </div>
+    <div class="std-grid reveal">
+      <div class="std-card">
+        <span class="code-name">ERC-20</span>
+        <h4>Fungible</h4>
+        <p>Every unit is identical and interchangeable — one token is worth exactly the same as any other of its kind.</p>
+        <span class="ex">e.g. stablecoins, governance tokens, in-app points</span>
+      </div>
+      <div class="std-card">
+        <span class="code-name">ERC-721</span>
+        <h4>Nonfungible</h4>
+        <p>Each token is unique, with its own ID and attributes — no two are interchangeable, even within the same contract.</p>
+        <span class="ex">e.g. one-of-a-kind collectibles, deeds, memberships</span>
+      </div>
+      <div class="std-card">
+        <span class="code-name">ERC-1155</span>
+        <h4>Both, in one contract</h4>
+        <p>A single contract can manage many token types at once — some fungible, some unique — which saves on deployment cost.</p>
+        <span class="ex">e.g. game items with both currency and unique gear</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="caps" class="dim">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Back to the question</div>
+      <h2>So — is there a hard cap?</h2>
+      <p class="lede" style="margin-top:10px;">Only if the contract's author wrote one in. In practice, most tokens fall into one of three patterns.</p>
+    </div>
+    <div class="pattern-grid reveal">
+      <div class="pattern-card">
+        <span class="pattern-tag">Fixed supply</span>
+        <h4>Hard-capped</h4>
+        <div class="pattern-viz"><div class="bar fixed-bar"></div><div class="fixed-cap-line"></div></div>
+        <p>The contract sets a maximum once, and mint() simply refuses to create more past that number — no matter who calls it.</p>
+      </div>
+      <div class="pattern-card">
+        <span class="pattern-tag">Continuous</span>
+        <h4>Open-ended</h4>
+        <div class="pattern-viz"><div class="open-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+        <p>No ceiling at all — new tokens mint whenever a condition is met. Stablecoins work this way: more get minted as more deposits come in, and burned on redemption.</p>
+      </div>
+      <div class="pattern-card">
+        <span class="pattern-tag">Asset-pegged</span>
+        <h4>Capped to a backing asset</h4>
+        <div class="pattern-viz"><div class="pegged-mark"><span>supply ≡ value backed</span></div></div>
+        <p>The cap is set to match a real-world asset's value — e.g. a $1M building split into exactly 1,000 tokens. Minting beyond that would create tokens with nothing behind them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ceiling">
+  <div class="wrap">
+    <div class="ceiling reveal">
+      <div>
+        <div class="eyebrow">A limit that never matters</div>
+        <h2 style="font-size:1.5rem; margin-bottom:14px;">There is one true ceiling — it's just never the real constraint</h2>
+        <p class="lede" style="margin-top:0;">Token balances are usually stored as a <code style="font-family:var(--mono); color:var(--cyan);">uint256</code> — a number that can hold values up to roughly 1.15 × 10⁷⁷. Whatever cap actually applies to a token, it's the one its author chose to write in, not anything Ethereum itself enforces.</p>
+      </div>
+      <div class="ceiling-stat">
+        115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457,584,007,913,129,639,936
+        <small>the maximum value a uint256 can hold — astronomically larger than any real token supply will ever reach</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gas" class="dim">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">The other kind of limit</div>
+      <h2>Even uncapped tokens aren't free to mint</h2>
+      <p class="lede" style="margin-top:10px;">There's no protocol-level supply limit, but every action still costs something — and that cost is its own kind of brake.</p>
+    </div>
+    <div class="gas-row reveal">
+      <div class="gas-card">
+        <h4>Paid in ETH</h4>
+        <p>Deploying a contract and calling its mint function both require a gas fee, paid in Ethereum's native currency, ETH.</p>
+      </div>
+      <div class="gas-card">
+        <h4>Scales with demand</h4>
+        <p>Gas prices rise and fall with how congested the network is — minting during a busy period costs more than minting on a quiet day.</p>
+      </div>
+      <div class="gas-card">
+        <h4>A built-in deterrent</h4>
+        <p>Even an "open-ended" contract with no coded cap isn't free to spam — every extra mint still has to be paid for, which naturally discourages unlimited minting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <strong>mint.eth</strong>
+      <p style="margin:6px 0 0; font-family:var(--mono); font-size:11.5px; color:var(--dimmer);">An educational explainer — not technical or financial advice.</p>
+    </div>
+    <p class="disclaimer">Built to answer a simple question: who can create a token on Ethereum, and is there ever a hard limit on how many can exist. Short answer: anyone with a wallet and some gas — and the limit, if any, is whatever the contract's author decided to code in.</p>
+  </div>
+</footer>
+
+<script>
+  // ---- Mint simulator ----
+  const cappedLines = [
+    {ln:1, code:'function mint(address to) public {'},
+    {ln:2, code:'  require(supply < cap, "max supply reached");', kw:true},
+    {ln:3, code:'  supply += 1;'},
+    {ln:4, code:'  _balances[to] += 1;'},
+    {ln:5, code:'  emit Transfer(address(0), to, 1);'},
+    {ln:6, code:'}'},
+  ];
+  const openLines = [
+    {ln:1, code:'function mint(address to) public {'},
+    {ln:2, code:'  supply += 1;'},
+    {ln:3, code:'  _balances[to] += 1;'},
+    {ln:4, code:'  emit Transfer(address(0), to, 1);'},
+    {ln:5, code:'}'},
+  ];
+
+  const termCode = document.getElementById('termCode');
+  const supplyBig = document.getElementById('supplyBig');
+  const supplyCap = document.getElementById('supplyCap');
+  const gaugeFill = document.getElementById('gaugeFill');
+  const gaugeCapMark = document.getElementById('gaugeCapMark');
+  const termLog = document.getElementById('termLog');
+  const mintBtn = document.getElementById('mintBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const capSwitch = document.getElementById('capSwitch');
+  const modeLabel = document.getElementById('modeLabel');
+  const termTitle = document.getElementById('termTitle');
+
+  const CAP = 12;
+  let capped = true;
+  let supply = 0;
+
+  function renderCode(){
+    const lines = capped ? cappedLines : openLines;
+    termCode.innerHTML = lines.map(l =>
+      `<div class="code-line ${l.kw ? 'kw':''}" data-ln="${l.ln}"><span class="ln">${l.ln}</span><span class="code">${l.code}</span></div>`
+    ).join('');
+  }
+
+  function renderState(){
+    supplyBig.textContent = supply;
+    if(capped){
+      supplyCap.textContent = `/ ${CAP} minted`;
+      gaugeFill.style.width = Math.min(100, (supply/CAP)*100) + '%';
+      gaugeCapMark.style.display = 'block';
+    } else {
+      supplyCap.textContent = 'minted · no cap set';
+      gaugeFill.style.width = Math.min(100, (supply % 12) * (100/12)) + '%';
+      gaugeCapMark.style.display = 'none';
+    }
+    mintBtn.disabled = capped && supply >= CAP;
+  }
+
+  function flashLines(seq, cb){
+    let i = 0;
+    const lines = document.querySelectorAll('.code-line');
+    function step(){
+      lines.forEach(l => l.classList.remove('active'));
+      if(i < seq.length){
+        const el = document.querySelector(`.code-line[data-ln="${seq[i]}"]`);
+        if(el) el.classList.add('active');
+        i++;
+        setTimeout(step, 220);
+      } else {
+        lines.forEach(l => l.classList.remove('active'));
+        if(cb) cb();
+      }
+    }
+    step();
+  }
+
+  mintBtn.addEventListener('click', () => {
+    if(capped && supply >= CAP) return;
+    const seq = capped ? [1,2,3,4,5,6] : [1,2,3,4,5];
+    mintBtn.disabled = true;
+    flashLines(seq, () => {
+      supply += 1;
+      renderState();
+      termLog.innerHTML = `<span class="ok">✓ mint() executed — supply now ${supply}</span>`;
+      if(capped && supply >= CAP){
+        setTimeout(() => {
+          const reqLine = document.querySelector('.code-line[data-ln="2"]');
+          if(reqLine) reqLine.classList.add('error-flash');
+          termLog.innerHTML = `<span class="fail">✕ next call would revert: "max supply reached"</span>`;
+        }, 300);
+      }
+      mintBtn.disabled = capped && supply >= CAP;
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    supply = 0;
+    renderState();
+    document.querySelectorAll('.code-line').forEach(l => l.classList.remove('error-flash','active'));
+    termLog.textContent = 'Ready. Click "Mint +1" to call the function.';
+  });
+
+  capSwitch.addEventListener('click', () => {
+    capped = !capped;
+    capSwitch.setAttribute('aria-pressed', String(capped));
+    modeLabel.textContent = capped ? 'Hard-capped contract' : 'Open-ended contract';
+    termTitle.textContent = capped ? 'Token.sol — capped mint()' : 'Token.sol — uncapped mint()';
+    supply = 0;
+    renderCode();
+    renderState();
+    termLog.textContent = capped
+      ? 'Switched to a hard-capped contract — mint() checks a ceiling before creating tokens.'
+      : 'Switched to an open-ended contract — no ceiling exists in the code at all.';
+  });
+
+  renderCode();
+  renderState();
+
+  // ---- Reveal on scroll ----
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
