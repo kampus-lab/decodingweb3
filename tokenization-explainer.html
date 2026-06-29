@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokenization &amp; Tokenized Assets — An Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14181F;
+    --ink-soft:#1D232C;
+    --paper:#F2EDE2;
+    --paper-dim:#E8E0CC;
+    --paper-line:rgba(20,24,31,0.12);
+    --dark-line:rgba(242,237,226,0.14);
+    --slate:#5B6573;
+    --brass:#B9883B;
+    --brass-soft:#D9B679;
+    --teal:#2F8F82;
+    --teal-soft:#7BC2B6;
+    --red-debit:#A8503F;
+    --max:1180px;
+    --serif: 'Fraunces', serif;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+  ::selection{background:var(--brass-soft); color:var(--ink);}
+  :focus-visible{outline:2px solid var(--teal); outline-offset:3px; border-radius:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  h1,h2,h3,h4{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--brass); display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--brass);}
+  .lede{font-size:1.18rem; color:var(--slate); max-width:640px; margin-top:18px;}
+  .light .lede{color:rgba(242,237,226,0.72);}
+
+  /* ===== NAV ===== */
+  nav.topnav{
+    position:sticky; top:0; z-index:50; background:rgba(20,24,31,0.97);
+    border-bottom:1px solid var(--dark-line); backdrop-filter:blur(6px);
+  }
+  .nav-inner{
+    max-width:var(--max); margin:0 auto; padding:14px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:24px;
+    color:var(--paper);
+  }
+  .wordmark{font-family:var(--serif); font-weight:700; font-size:1.05rem; color:var(--paper); white-space:nowrap;}
+  .wordmark span{color:var(--brass-soft);}
+  .nav-links{display:flex; gap:22px; list-style:none; margin:0; padding:0; overflow-x:auto; scrollbar-width:none;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .nav-links a{
+    font-family:var(--mono); font-size:12.5px; letter-spacing:0.05em; text-transform:uppercase;
+    color:rgba(242,237,226,0.62); text-decoration:none; white-space:nowrap; transition:color .15s;
+  }
+  .nav-links a:hover{color:var(--teal-soft);}
+
+  /* ===== TICKER ===== */
+  .ticker{
+    background:var(--ink-soft); border-bottom:1px solid var(--dark-line);
+    overflow:hidden; padding:9px 0; position:relative;
+  }
+  .ticker-track{display:flex; width:max-content; animation:scrollticker 38s linear infinite;}
+  .ticker:hover .ticker-track{animation-play-state:paused;}
+  .ticker span{
+    font-family:var(--mono); font-size:12.5px; color:var(--teal-soft);
+    padding:0 28px; white-space:nowrap; border-right:1px solid var(--dark-line);
+  }
+  .ticker span b{color:var(--brass-soft); font-weight:600;}
+  @keyframes scrollticker{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* ===== HERO ===== */
+  .hero{background:var(--ink); color:var(--paper); padding:72px 0 90px; position:relative; overflow:hidden;}
+  .hero::after{
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:0.5;
+    background-image: radial-gradient(circle at 18% 110%, rgba(185,136,59,0.18), transparent 55%),
+                       radial-gradient(circle at 92% -10%, rgba(47,143,130,0.18), transparent 55%);
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center; position:relative; z-index:1;
+  }
+  .hero h1{font-size:clamp(2.3rem, 4.6vw, 3.6rem); line-height:1.06; color:var(--paper); max-width:560px;}
+  .hero h1 em{font-style:italic; color:var(--brass-soft);}
+
+  /* fragment visualizer */
+  .frag-card{
+    background:var(--ink-soft); border:1px solid var(--dark-line); border-radius:14px; padding:26px;
+  }
+  .frag-card-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;}
+  .frag-card-top .lbl{font-family:var(--mono); font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--slate);}
+  .frag-card-top .val{font-family:var(--mono); font-size:1rem; color:var(--brass-soft); font-weight:600;}
+  .frag-stage-wrap{
+    aspect-ratio:1/1; max-width:280px; margin:0 auto; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.18); border-radius:8px; border:1px solid var(--dark-line); padding:8px;
+  }
+  #fragStage{
+    display:grid; width:100%; height:100%; gap:2px;
+  }
+  .frag-tile{
+    background:linear-gradient(145deg, var(--brass), var(--brass-soft));
+    border-radius:2px; opacity:0; transform:scale(0.4);
+    animation:popin .45s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes popin{ to{ opacity:1; transform:scale(1); } }
+  .frag-controls{margin-top:20px;}
+  .frag-controls input[type=range]{
+    width:100%; accent-color:var(--teal); cursor:pointer;
+  }
+  .frag-readout{
+    display:flex; justify-content:space-between; margin-top:14px; font-family:var(--mono); font-size:13px;
+  }
+  .frag-readout .price{color:var(--teal-soft); font-weight:600; font-size:1rem;}
+  .frag-readout .n{color:var(--paper);}
+  .frag-caption{margin-top:16px; font-size:13.5px; color:rgba(242,237,226,0.58); line-height:1.55;}
+
+  /* ===== SECTIONS GENERIC ===== */
+  section{padding:84px 0;}
+  .section-head{max-width:680px; margin-bottom:48px;}
+  .section-head h2{font-size:clamp(1.7rem, 3vw, 2.3rem); line-height:1.15;}
+  .rule{border:0; border-top:1px solid var(--paper-line); margin:0;}
+  .dim-bg{background:var(--paper-dim);}
+  .ink-bg{background:var(--ink); color:var(--paper);}
+  .ink-bg .section-head h2{color:var(--paper);}
+
+  /* token type cards */
+  .type-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px;}
+  .type-card{
+    background:var(--ink); color:var(--paper); border-radius:14px; padding:30px; position:relative; overflow:hidden;
+  }
+  .type-card.alt{background:#252B22;}
+  .type-card h3{font-size:1.3rem; color:var(--paper); margin-bottom:6px;}
+  .type-card .tag{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--brass-soft); margin-bottom:14px; display:block;}
+  .type-card p{color:rgba(242,237,226,0.72); font-size:0.96rem; margin:14px 0 18px;}
+  .swatch-grid{display:grid; grid-template-columns:repeat(8,1fr); gap:4px; margin-bottom:10px;}
+  .swatch{aspect-ratio:1; border-radius:2px;}
+  .swatch.fungible{background:var(--brass);}
+  .type-card .examples{font-size:0.85rem; color:var(--teal-soft); font-family:var(--mono);}
+
+  /* ledger lists (benefits/risks) */
+  .ledger{max-width:920px;}
+  .ledger-row{
+    display:grid; grid-template-columns:46px 1fr; gap:20px; padding:22px 0; border-bottom:1px solid var(--paper-line);
+  }
+  .ledger-row:first-child{border-top:1px solid var(--paper-line);}
+  .ledger-mark{
+    font-family:var(--mono); font-weight:600; font-size:1.05rem; height:34px; width:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ledger-mark.credit{background:rgba(47,143,130,0.15); color:var(--teal);}
+  .ledger-mark.debit{background:rgba(168,80,63,0.15); color:var(--red-debit);}
+  .ledger-row h4{font-size:1.08rem; margin-bottom:6px;}
+  .ledger-row p{margin:0; color:var(--slate); font-size:0.97rem; max-width:680px;}
+  .ledger-row .fact{
+    display:inline-block; margin-top:10px; font-family:var(--mono); font-size:12px; color:var(--brass);
+    background:rgba(185,136,59,0.1); padding:3px 9px; border-radius:20px;
+  }
+
+  /* use case receipts */
+  .case-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
+  .case-card{
+    background:var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:24px;
+    box-shadow:0 1px 0 var(--paper-line);
+  }
+  .case-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px dashed var(--paper-line); padding-bottom:14px;}
+  .case-head h4{font-size:1.1rem;}
+  .case-head .date{font-family:var(--mono); font-size:11.5px; color:var(--slate); text-align:right;}
+  .case-meta{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+  .case-meta span{
+    font-family:var(--mono); font-size:11.5px; background:var(--paper-dim); padding:4px 9px; border-radius:4px; color:var(--ink);
+  }
+  .case-card p{margin:0; font-size:0.94rem; color:var(--slate);}
+
+  /* STO process chain */
+  .chain{position:relative; max-width:760px; margin:0 auto; padding-left:64px;}
+  .chain::before{content:""; position:absolute; left:23px; top:8px; bottom:8px; width:2px; background:repeating-linear-gradient(to bottom, var(--brass) 0 6px, transparent 6px 12px);}
+  .chain-step{position:relative; padding-bottom:42px;}
+  .chain-step:last-child{padding-bottom:0;}
+  .chain-num{
+    position:absolute; left:-64px; top:0; width:46px; height:46px; border-radius:50%;
+    background:var(--ink); color:var(--brass-soft); font-family:var(--mono); font-weight:600; font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center; border:2px solid var(--brass);
+  }
+  .chain-step h4{font-size:1.08rem; margin-bottom:6px;}
+  .chain-step p{margin:0; color:var(--slate); font-size:0.95rem; max-width:600px;}
+
+  /* execution cards */
+  .exec-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .exec-card{background:var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:24px;}
+  .exec-card .num{font-family:var(--mono); color:var(--teal); font-size:0.85rem; margin-bottom:10px; display:block;}
+  .exec-card h4{font-size:1.05rem; margin-bottom:10px;}
+  .exec-card p{font-size:0.92rem; color:var(--slate); margin:0;}
+
+  /* howey */
+  .howey{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;}
+  .howey-story{color:rgba(242,237,226,0.75); font-size:0.98rem;}
+  .howey-story p{margin:0 0 16px;}
+  .howey-story .case-cite{font-family:var(--mono); font-size:12.5px; color:var(--brass-soft); display:block; margin-top:6px;}
+  .howey-toggles{background:var(--ink-soft); border:1px solid var(--dark-line); border-radius:14px; padding:26px;}
+  .howey-toggle{
+    display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--dark-line); cursor:pointer;
+    background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; color:var(--paper); font-family:var(--sans);
+  }
+  .howey-toggle:last-of-type{border-bottom:none;}
+  .switch{
+    width:42px; height:24px; border-radius:14px; background:rgba(242,237,226,0.16); position:relative; flex:none; transition:background .2s;
+  }
+  .switch::after{
+    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:var(--paper); transition:transform .2s;
+  }
+  .howey-toggle[aria-pressed="true"] .switch{background:var(--teal);}
+  .howey-toggle[aria-pressed="true"] .switch::after{transform:translateX(18px);}
+  .howey-toggle .ht-text strong{display:block; font-size:0.96rem;}
+  .howey-toggle .ht-text span{font-size:0.83rem; color:rgba(242,237,226,0.55);}
+  .howey-result{
+    margin-top:20px; padding:16px; border-radius:10px; text-align:center; font-family:var(--mono);
+    background:rgba(242,237,226,0.06); border:1px dashed var(--dark-line); color:rgba(242,237,226,0.5); font-size:13px;
+    transition:all .25s;
+  }
+  .howey-result.active{
+    background:rgba(47,143,130,0.15); border-color:var(--teal); color:var(--teal-soft); font-weight:600; font-size:14px;
+  }
+
+  /* outlook */
+  .outlook-grid{display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;}
+  .big-stat{font-family:var(--serif); font-size:clamp(3rem,7vw,5rem); color:var(--ink); line-height:1; font-weight:700;}
+  .big-stat span{display:block; font-family:var(--mono); font-size:0.95rem; color:var(--slate); font-weight:400; margin-top:10px; letter-spacing:0.02em;}
+
+  /* glossary accordion */
+  .gloss{max-width:820px;}
+  .gloss-item{border-bottom:1px solid var(--paper-line);}
+  .gloss-item:first-child{border-top:1px solid var(--paper-line);}
+  .gloss-q{
+    width:100%; display:flex; justify-content:space-between; align-items:center; padding:18px 2px;
+    background:none; border:none; cursor:pointer; font-family:var(--serif); font-size:1.05rem; color:var(--ink); text-align:left;
+  }
+  .gloss-q .plus{font-family:var(--mono); color:var(--brass); transition:transform .2s; font-size:1.2rem;}
+  .gloss-item[data-open="true"] .plus{transform:rotate(45deg);}
+  .gloss-a{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+  .gloss-a p{margin:0 2px 18px; color:var(--slate); font-size:0.94rem; max-width:680px;}
+
+  /* footer */
+  footer{background:var(--ink); color:rgba(242,237,226,0.55); padding:48px 0 36px; font-size:0.85rem;}
+  footer .wrap{display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; align-items:flex-end;}
+  footer strong{color:var(--paper); font-family:var(--serif); font-weight:600; font-size:1rem;}
+  footer .disclaimer{max-width:480px; line-height:1.6;}
+
+  /* reveal */
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr; gap:40px;}
+    .type-grid, .case-grid, .exec-grid, .howey, .outlook-grid{grid-template-columns:1fr;}
+    .nav-links{gap:16px;}
+    section{padding:60px 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <span class="wordmark">token<span>ize</span>d.</span>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#types">Token Types</a></li>
+      <li><a href="#benefits">Benefits</a></li>
+      <li><a href="#risks">Risks</a></li>
+      <li><a href="#cases">Examples</a></li>
+      <li><a href="#process">STO Process</a></li>
+      <li><a href="#building">Building a Token</a></li>
+      <li><a href="#howey">Howey Test</a></li>
+      <li><a href="#outlook">Outlook</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="tickerTrack">
+    <span><b>$16T+</b> — BCG's forecast for tokenized illiquid assets by 2030</span>
+    <span><b>$110B+</b> — stablecoins in circulation as of December 2023</span>
+    <span><b>15–30%</b> — liquidity premium of public assets over private peers</span>
+    <span><b>≤72 hrs</b> — typical traditional settlement vs. near-instant on-chain settlement</span>
+    <span><b>$16T+</b> — BCG's forecast for tokenized illiquid assets by 2030</span>
+    <span><b>$110B+</b> — stablecoins in circulation as of December 2023</span>
+    <span><b>15–30%</b> — liquidity premium of public assets over private peers</span>
+    <span><b>≤72 hrs</b> — typical traditional settlement vs. near-instant on-chain settlement</span>
+  </div>
+</div>
+
+<header class="hero light" id="overview">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">An explainer</div>
+      <h1>One asset, cut into <em>many digital pieces</em> anyone can own.</h1>
+      <p class="lede">Tokenization takes a real asset — a building, a share, a painting, even a tonne of carbon credit — and represents ownership of it with digital tokens on a blockchain. The token is just a wrapper; its value still comes from whatever sits underneath it.</p>
+      <p class="lede">Drag the slider to see why that matters: splitting one expensive asset into many small tokens is what lets ordinary investors buy in.</p>
+    </div>
+    <div class="frag-card">
+      <div class="frag-card-top">
+        <span class="lbl">Whole asset</span>
+        <span class="val">$1,000,000 office building</span>
+      </div>
+      <div class="frag-stage-wrap">
+        <div id="fragStage"></div>
+      </div>
+      <div class="frag-controls">
+        <input type="range" id="fragSlider" min="0" max="4" step="1" value="0" aria-label="Number of tokens the asset is split into">
+      </div>
+      <div class="frag-readout">
+        <span class="n" id="fragN">1 token issued</span>
+        <span class="price" id="fragPrice">$1,000,000 / token</span>
+      </div>
+      <p class="frag-caption">Each tile represents one token's claim on the building. Slide right to fractionalize further — the entry price per token falls as the count rises, which is exactly how tokenization lowers the barrier to investing in assets like real estate or fine art.</p>
+    </div>
+  </div>
+</header>
+
+<section id="types">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Two families</div>
+      <h2>Every tokenized asset is either fungible or nonfungible</h2>
+      <p class="lede" style="margin-top:10px;">This single distinction decides how a token behaves: whether each unit is identical and swappable, or one-of-a-kind.</p>
+    </div>
+    <div class="type-grid">
+      <div class="type-card reveal">
+        <span class="tag">Fungible</span>
+        <h3>Interchangeable units</h3>
+        <div class="swatch-grid">
+          <div class="swatch fungible"></div><div class="swatch fungible"></div><div class="swatch fungible"></div><div class="swatch fungible"></div>
+          <div class="swatch fungible"></div><div class="swatch fungible"></div><div class="swatch fungible"></div><div class="swatch fungible"></div>
+        </div>
+        <p>Every unit is worth exactly the same as every other unit of its kind, so one can stand in for another without any loss of value — the same way one dollar bill is as good as any other.</p>
+        <span class="examples">e.g. currencies · equities · bonds · precious metals</span>
+      </div>
+      <div class="type-card alt reveal">
+        <span class="tag" style="color:var(--teal-soft);">Nonfungible</span>
+        <h3>One-of-a-kind units</h3>
+        <div class="swatch-grid" id="nftSwatches"></div>
+        <p>Each unit carries its own distinct attributes or value, so no two tokens of the same type are interchangeable — swapping one for another would mean trading away something different.</p>
+        <span class="examples" style="color:var(--brass-soft);">e.g. lottery tickets · club memberships</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="benefits" class="dim-bg">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Credit side of the ledger</div>
+      <h2>What tokenization is supposed to fix</h2>
+      <p class="lede" style="margin-top:10px;">Seven reasons issuers and investors are drawn to putting assets on-chain.</p>
+    </div>
+    <div class="ledger reveal">
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Disintermediation &amp; cost reduction</h4>
+          <p>A blockchain can verify and record ownership on its own, so fewer middlemen are needed for clearing, settlement, and paperwork — and that means lower transaction costs for investors.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Increased market participation</h4>
+          <p>Breaking an asset into many small tokens lets people buy a slice instead of the whole thing, opening up real estate, fine art, and private equity to investors who could never meet the usual minimum cheque.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Diversification</h4>
+          <p>Once those previously locked-away asset classes become reachable, investors can spread money across categories that tend to move differently from stocks and bonds — and that can also cushion a portfolio against inflation.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Increased liquidity</h4>
+          <p>Issuers commonly arrange secondary-market trading for their tokens, and an asset that trades easily tends to be worth more than an otherwise identical asset that's stuck in private hands.</p>
+          <span class="fact">Public assets have traded at a 15–30% premium over private peers — Officer (1997)</span>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Faster settlement</h4>
+          <p>A conventional trade can take up to three business days to settle and only moves during banking hours. On-chain, settlement can happen almost the instant a trade is agreed, around the clock — freeing capital faster and letting the asset be reused as collateral sooner.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Asset programmability</h4>
+          <p>Because tokens live inside smart contracts, routine post-trade work — paying dividends or coupons, rebalancing a fund — can run automatically on a schedule, trimming the cost of servicing the asset.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark credit">+</span>
+        <div>
+          <h4>Transparency &amp; security</h4>
+          <p>Entries written to a blockchain can't quietly be altered or erased by a central authority, and the same ledger is open for anyone to inspect — so every participant sees the same record of who owns what.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Debit side of the ledger</div>
+      <h2>What can go wrong</h2>
+      <p class="lede" style="margin-top:10px;">Tokenization doesn't remove risk — in some ways it adds new kinds.</p>
+    </div>
+    <div class="ledger reveal">
+      <div class="ledger-row">
+        <span class="ledger-mark debit">–</span>
+        <div>
+          <h4>Investment risk</h4>
+          <p>Letting in less experienced retail investors exposes them to asset classes that are inherently more complex than the stocks and bonds they're used to. Less sophisticated investors are also more prone to herd behaviour, which can help inflate speculative bubbles.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark debit">–</span>
+        <div>
+          <h4>Regulatory risk</h4>
+          <p>Rules for tokenized assets are still being written, vary widely between countries, and in places barely exist — leaving issuers exposed to penalties, and potentially worse, if regulators later treat the offering differently than expected.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark debit">–</span>
+        <div>
+          <h4>Security risk</h4>
+          <p>The blockchain technology behind tokenized assets is still relatively young and can be vulnerable to attacks — and additional weak points can appear wherever it has to connect with older, legacy financial systems.</p>
+        </div>
+      </div>
+      <div class="ledger-row">
+        <span class="ledger-mark debit">–</span>
+        <div>
+          <h4>Market integrity risk</h4>
+          <p>Because oversight of this young industry is still thin, problems such as a breach of the blockchain itself or theft of the real-world asset held in custody can go unnoticed longer than they would in more mature, closely monitored markets.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cases" class="dim-bg">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">From the ledger</div>
+      <h2>Real tokenization deals, across asset classes</h2>
+      <p class="lede" style="margin-top:10px;">Six examples of how the theory has actually played out, from real estate to a Picasso.</p>
+    </div>
+    <div class="case-grid reveal">
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Real Estate</h4>
+          <span class="date">APR 2021</span>
+        </div>
+        <div class="case-meta"><span>ADDX</span><span>Singapore</span><span>Min. €20,000</span></div>
+        <p>ADDX tokenized a slice of the Mapletree Europe Income Trust, a private fund of Grade-A European office property. Accredited and institutional investors could buy in at a far lower minimum than the fund usually demanded, then trade their stake on ADDX's own secondary market.</p>
+      </div>
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Private Equity</h4>
+          <span class="date">SEP 2022</span>
+        </div>
+        <div class="case-meta"><span>Securitize</span><span>United States</span><span>Reg D 506(c)</span></div>
+        <p>Securitize tokenized part of KKR's Health Care Strategic Growth Fund II, a healthcare-focused buyout fund, in a regulated exempt offering — opening up a private-equity strategy to accredited and institutional investors at a lower entry ticket.</p>
+      </div>
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Fixed Income</h4>
+          <span class="date">JUN 2023</span>
+        </div>
+        <div class="case-meta"><span>BOCI &amp; UBS</span><span>Hong Kong</span><span>CNH 200,000,000</span></div>
+        <p>Bank of China International became the first mainland Chinese institution to issue a tokenized security in Hong Kong, placing tokenized structured notes with UBS clients across Asia-Pacific. For issuers who sell debt often, the on-chain efficiency gains compound with every issuance.</p>
+      </div>
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Artwork</h4>
+          <span class="date">JUL 2021</span>
+        </div>
+        <div class="case-meta"><span>Sygnum</span><span>Switzerland</span><span>4,000 tokens @ CHF 1,000</span></div>
+        <p>Sygnum tokenized Picasso's 1964 painting <em>Fillette au béret</em>, splitting ownership among more than 50 investors with fractional ownership recognized under Swiss law. The tokens later traded on Sygnum's own secondary market.</p>
+      </div>
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Carbon Credits</h4>
+          <span class="date">MAY 2022</span>
+        </div>
+        <div class="case-meta"><span>Flowcarbon</span><span>United States</span><span>$70M raised</span></div>
+        <p>Flowcarbon raised funding from investors including a16z, General Catalyst, and Samsung Ventures to let project developers sell carbon credits as digital tokens — adding traceability to a market that's historically been scattered and hard to verify.</p>
+      </div>
+      <div class="case-card">
+        <div class="case-head">
+          <h4>Currencies</h4>
+          <span class="date">DEC 2023</span>
+        </div>
+        <div class="case-meta"><span>Tether · Circle</span><span>Global</span><span>$110B+ in circulation</span></div>
+        <p>Stablecoins peg their value to a reference asset, usually the US dollar, making them barely volatile and well suited to cross-border payments — which settle faster and cheaper on-chain than through networks like SWIFT.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">How a deal actually happens</div>
+      <h2>The Security Token Offering, step by step</h2>
+      <p class="lede" style="margin-top:10px;">An STO works much like a traditional securities offering — just with a blockchain doing the bookkeeping.</p>
+    </div>
+    <div class="chain reveal">
+      <div class="chain-step"><div class="chain-num">1</div>
+        <h4>Preliminary discussions</h4>
+        <p>A tokenization platform and a would-be issuer start talking, kicking off the work of shaping an offering investors will eventually see.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">2</div>
+        <h4>Structuring</h4>
+        <p>The deal is shaped around the relevant regulatory framework and the format the investment will take — equity, debt, a fund, or some other structure.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">3</div>
+        <h4>Subscription</h4>
+        <p>Once listed, investors subscribe. The moment legal ownership passes to them, their subscription money moves to the issuer.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">4</div>
+        <h4>Minting &amp; distribution of tokens</h4>
+        <p>With subscriptions settled, tokens are created ("minted") on the chosen blockchain and sent to each investor.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">5</div>
+        <h4>Asset servicing</h4>
+        <p>The platform, often acting as custodian, keeps the asset running day to day — paying dividends or coupons, publishing NAV updates, handling ongoing admin.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">6</div>
+        <h4>Secondary market trading</h4>
+        <p>The issuer can list the token on a secondary venue, giving holders a way to exit early and giving the asset more liquidity overall.</p>
+      </div>
+      <div class="chain-step"><div class="chain-num">7</div>
+        <h4>Maturity &amp; burning of tokens</h4>
+        <p>For fixed-term investments — a bond, a closed-end fund — tokens reach maturity, get "burned" out of circulation, and investors receive principal plus return.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="building" class="dim-bg">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Behind the scenes</div>
+      <h2>What an issuer actually has to set up</h2>
+      <p class="lede" style="margin-top:10px;">Three practical jobs sit underneath every tokenized asset, however the offering is marketed.</p>
+    </div>
+    <div class="exec-grid reveal">
+      <div class="exec-card">
+        <span class="num">01 / NETWORK &amp; TOKEN</span>
+        <h4>Register the asset, configure the token</h4>
+        <p>Issuers pick a blockchain (Ethereum, Avalanche…), a token standard suited to the asset (e.g. ERC-20 for fungible tokens, ERC-721/1155 for unique ones), how many tokens to issue, and the rules for minting and burning. They also choose between a permissionless network — open to anyone — and a permissioned one limited to approved participants.</p>
+      </div>
+      <div class="exec-card">
+        <span class="num">02 / CUSTODY</span>
+        <h4>Store, manage, and distribute tokens</h4>
+        <p>Since a token's value depends entirely on what backs it, the underlying asset is usually held in escrow or with a custodian, with periodic audits confirming the collateral is still all there. Issuers can also list the token on a secondary exchange to make it easier to trade and transfer.</p>
+      </div>
+      <div class="exec-card">
+        <span class="num">03 / SERVICING</span>
+        <h4>Automate corporate actions</h4>
+        <p>Smart contracts can run the routine business of owning the asset — scheduling NAV updates, paying dividends or coupons on time, keeping records current — without manual work, which lowers the ongoing cost of servicing it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="howey" class="ink-bg light">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Is it a security?</div>
+      <h2>The Howey Test, applied to tokens</h2>
+      <p class="lede" style="margin-top:10px;">Whether a tokenized asset has to be registered and disclosed under U.S. securities law comes down to four conditions — all four, or none of it counts.</p>
+    </div>
+    <div class="howey reveal">
+      <div class="howey-story">
+        <p>The test traces back to <em>SEC v. W.J. Howey Co.</em> (1946). Investors bought citrus groves in Florida and immediately leased the land straight back to the Howey Company, which farmed it, sold the fruit, and split the profit with the investors. The SEC argued the arrangement should have been registered as a securities offering — and the Supreme Court agreed, ruling the leaseback deal was an "investment contract."</p>
+        <p>That ruling still defines what counts as a security today, including for tokenized assets. Toggle the four switches to see how it applies to a token representing one share of Apple stock.</p>
+        <span class="case-cite">SEC v. W.J. Howey Co., 328 U.S. 293 (1946)</span>
+      </div>
+      <div class="howey-toggles" role="group" aria-label="Howey Test elements">
+        <button class="howey-toggle" data-text="An investor must put money into the asset — buying the Apple token costs real money." aria-pressed="false">
+          <span class="switch"></span>
+          <span class="ht-text"><strong>1. Investment of money</strong><span>Capital actually changes hands</span></span>
+        </button>
+        <button class="howey-toggle" data-text="That money is pooled into a shared enterprise — Apple's business as a whole, not a side deal just for this token." aria-pressed="false">
+          <span class="switch"></span>
+          <span class="ht-text"><strong>2. Common enterprise</strong><span>Pooled into one shared venture</span></span>
+        </button>
+        <button class="howey-toggle" data-text="The buyer expects to make a profit — the whole reason to hold the token is that the share price might rise." aria-pressed="false">
+          <span class="switch"></span>
+          <span class="ht-text"><strong>3. Expectation of profit</strong><span>Buyer is in it to gain</span></span>
+        </button>
+        <button class="howey-toggle" data-text="Any profit comes from Apple's management and employees doing their jobs well — not from anything the token holder personally does." aria-pressed="false">
+          <span class="switch"></span>
+          <span class="ht-text"><strong>4. Effort of others</strong><span>Profit driven by someone else's work</span></span>
+        </button>
+        <div class="howey-result" id="howeyResult">Toggle all four to see the verdict</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="outlook">
+  <div class="wrap">
+    <div class="outlook-grid">
+      <div class="reveal">
+        <div class="big-stat">$16T<span>BCG's projection for global tokenization of illiquid assets, by 2030</span></div>
+      </div>
+      <div class="reveal">
+        <div class="eyebrow">Where this goes next</div>
+        <h2 style="font-size:1.6rem; margin-bottom:14px;">The upside is clear. The rulebook isn't.</h2>
+        <p style="color:var(--slate); max-width:480px;">The benefits on both sides of the ledger — lower costs and more automation for issuers, broader access and more liquidity for investors — are why forecasts for this market keep climbing. The thing still holding it back is regulation: rules for tokenized assets remain patchy and inconsistent from one jurisdiction to the next. What's likely needed next is something closer to a shared global vocabulary and a coordinated legal, regulatory, and supervisory framework — one that removes the uncertainty issuers and investors are currently pricing in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="glossary" class="dim-bg">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Quick reference</div>
+      <h2>Glossary</h2>
+    </div>
+    <div class="gloss reveal" id="glossList">
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Blockchain</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>A shared digital ledger spread across many computers in a network. New entries are bundled into "blocks" and cryptographically linked to the one before, which makes the history very difficult to alter after the fact.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Smart contract</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>Code that runs automatically once certain conditions are met, used to carry out, verify, or enforce the terms of an agreement without a person having to step in.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Fungible tokenized asset</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>A token where every unit is worth exactly the same as any other unit of its kind, so units can be swapped for one another — much like a dollar bill or a share of stock.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Nonfungible tokenized asset</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>A one-of-a-kind token carrying its own distinct attributes or value, so it can't be swapped for another token of the same type.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Permissionless blockchain</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>A network that anyone can join to validate transactions or deploy smart contracts on.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Permissioned blockchain</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>A network where only a pre-approved set of participants can validate transactions or deploy smart contracts.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Minting</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>The act of creating new tokens.</p></div>
+      </div>
+      <div class="gloss-item" data-open="false">
+        <button class="gloss-q"><span>Burning</span><span class="plus">+</span></button>
+        <div class="gloss-a"><p>Permanently removing tokens from circulation, reducing the total supply.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <strong>tokenized.</strong>
+      <p style="margin:6px 0 0; color:rgba(242,237,226,0.4); font-family:var(--mono); font-size:12px;">An independent explainer — not financial or legal advice.</p>
+    </div>
+    <p class="disclaimer">Built as a study companion synthesizing concepts from Ivey Publishing case note W36668, "A Note on Tokenization and Tokenized Assets" (Hrnjić &amp; Wee, 2024). All figures and examples are paraphrased for educational purposes; refer to the original case note and its cited sources for full detail and proper citation.</p>
+    </div>
+</footer>
+
+<script>
+  // ---- Fragmentation visualizer ----
+  const steps = [1, 4, 16, 64, 256];
+  const stage = document.getElementById('fragStage');
+  const slider = document.getElementById('fragSlider');
+  const fragN = document.getElementById('fragN');
+  const fragPrice = document.getElementById('fragPrice');
+  const ASSET_VALUE = 1000000;
+
+  function fmt(n){
+    if(n >= 1000) return '$' + Math.round(n).toLocaleString('en-US');
+    return '$' + n.toFixed(2);
+  }
+
+  function renderStage(n){
+    const side = Math.sqrt(n);
+    stage.style.gridTemplateColumns = `repeat(${side}, 1fr)`;
+    stage.style.gridTemplateRows = `repeat(${side}, 1fr)`;
+    stage.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    for(let i=0; i<n; i++){
+      const tile = document.createElement('div');
+      tile.className = 'frag-tile';
+      tile.style.animationDelay = (Math.min(i,80) * 6) + 'ms';
+      tile.title = `1 of ${n} tokens · ${fmt(ASSET_VALUE/n)} each`;
+      frag.appendChild(tile);
+    }
+    stage.appendChild(frag);
+    fragN.textContent = n === 1 ? '1 token issued' : n.toLocaleString('en-US') + ' tokens issued';
+    fragPrice.textContent = fmt(ASSET_VALUE/n) + ' / token';
+  }
+
+  slider.addEventListener('input', () => renderStage(steps[+slider.value]));
+  renderStage(steps[0]);
+
+  // ---- NFT swatch grid: unique-looking tiles ----
+  const nftHost = document.getElementById('nftSwatches');
+  const palette = ['#2F8F82','#B9883B','#7BC2B6','#A8503F','#D9B679','#5B6573','#3D6E63','#C99A52'];
+  for(let i=0;i<8;i++){
+    const s = document.createElement('div');
+    s.className = 'swatch';
+    const c1 = palette[i % palette.length];
+    const c2 = palette[(i*3+2) % palette.length];
+    s.style.background = `linear-gradient(${(i*47)%360}deg, ${c1}, ${c2})`;
+    nftHost.appendChild(s);
+  }
+
+  // ---- Howey toggles ----
+  const toggles = Array.from(document.querySelectorAll('.howey-toggle'));
+  const result = document.getElementById('howeyResult');
+  toggles.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      result.textContent = btn.dataset.text;
+      result.classList.remove('active');
+      const allOn = toggles.every(b => b.getAttribute('aria-pressed') === 'true');
+      if(allOn){
+        result.textContent = '✓ All four conditions met — this token counts as a security.';
+        result.classList.add('active');
+      } else if (toggles.every(b => b.getAttribute('aria-pressed') === 'false')) {
+        result.textContent = 'Toggle all four to see the verdict';
+      }
+    });
+  });
+
+  // ---- Glossary accordion ----
+  document.querySelectorAll('.gloss-item').forEach(item => {
+    const q = item.querySelector('.gloss-q');
+    const a = item.querySelector('.gloss-a');
+    q.addEventListener('click', () => {
+      const open = item.getAttribute('data-open') === 'true';
+      item.setAttribute('data-open', String(!open));
+      a.style.maxHeight = open ? '0px' : a.scrollHeight + 'px';
+    });
+  });
+
+  // ---- Reveal on scroll ----
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
